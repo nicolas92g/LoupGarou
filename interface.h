@@ -1,10 +1,13 @@
+#ifndef INTERFACE
+#define INTERFACE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+
 
 /**
  * @brief creer une fenetre avec glfw
@@ -26,3 +29,9 @@ unsigned int compilerLeShader(const char* vertexShaderPath, const char* fragment
  * @brief rempli un vertex Array avec un carre
  */
 unsigned int creerUnCarre();
+/**
+ * @brief creer une texture a partir d'un fichier (.png, .jpg, etc..)
+ */
+unsigned int chargerUneTexture(const char* path);
+
+#endif // !INTERFACE
