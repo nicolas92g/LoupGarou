@@ -165,4 +165,62 @@ unsigned int chargerUneTexture(const char* path)
     return texture;
 }
 
+mat4x4 ProjectionOrthographique(float left, float right, float bottom, float top, float zNear, float zFar) {
+    mat4x4 ret = matriceDidentite(1);
+
+    ret.line0.x =  2.0f / (right - left);
+    ret.line1.y =  2.0f / (top - bottom);
+    ret.line2.z = -2.0f / (zFar - zNear);
+
+    ret.line3.x = -(right + left) / (right - left);
+    ret.line3.y = -(top + bottom) / (top - bottom);
+    ret.line3.z = -(zFar + zNear) / (zFar - zNear);
+
+    return ret;
+}
+
+vec4 make_vec4(float x, float y, float z, float w) {
+    return (vec4) {x, y, z, w};
+}
+
+Uniform make_Uniform(const char* name, unsigned int shader){
+    return (Uniform) {name, glGetUniformLocation(shader, name)};
+}
+
+mat4x4 matriceDidentite(float f) {
+    mat4x4 ret;
+    ret.line0 = make_vec4(f, 0, 0, 0);
+    ret.line1 = make_vec4(0, f, 0, 0);
+    ret.line2 = make_vec4(0, 0, f, 0);
+    ret.line3 = make_vec4(0, 0, 0, f);
+    return ret;
+}
+
+mat4x4 matriceDeTaille(float x, float y, float z) {
+    mat4x4 ret;
+    ret.line0 = make_vec4(x, 0, 0, 0);
+    ret.line1 = make_vec4(0, y, 0, 0);
+    ret.line2 = make_vec4(0, 0, z, 0);
+    ret.line3 = make_vec4(0, 0, 0, 1);
+    return ret;
+}
+
+mat4x4 matriceDeTranslation(float x, float y, float z) {
+    mat4x4 ret;
+    ret.line0 = make_vec4(1, 0, 0, x);
+    ret.line1 = make_vec4(0, 1, 0, y);
+    ret.line2 = make_vec4(0, 0, 1, z);
+    ret.line3 = make_vec4(0, 0, 0, 1);
+    return ret;
+}
+
+mat4x4 multiplicationDeMatrices(mat4x4* m1, mat4x4* m2)
+{
+    mat4x4 ret;
+    ret.line0 = make_vec4(m1->line0.x * m2->line0.x, m1->line0.y * m2->line0.y, m1->line0.z * m2->line0.z, m1->line0.w * m2->line0.w);
+    ret.line1 = make_vec4(m1->line1.x * m2->line1.x, m1->line1.y * m2->line1.y, m1->line1.z * m2->line1.z, m1->line1.w * m2->line1.w);
+    ret.line2 = make_vec4(m1->line2.x * m2->line2.x, m1->line2.y * m2->line2.y, m1->line2.z * m2->line2.z, m1->line2.w * m2->line2.w);
+    ret.line3 = make_vec4(m1->line3.x * m2->line3.x, m1->line3.y * m2->line3.y, m1->line3.z * m2->line3.z, m1->line3.w * m2->line3.w);
+    return ret;
+}
 
