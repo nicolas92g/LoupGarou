@@ -4,9 +4,12 @@
 #include "stb_image.h"
 
 void creerLaFenetre(GLFWwindow** window) {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+    glfwInit();//initialise la librairie glfw
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//on utilise opengl 3.x
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//on utilise opengl 3.3
+
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 128);
 
@@ -51,13 +54,15 @@ char* fichierVersString(const char* filename)  {
 
 unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
 {
+    //recupere le texte dans les fichiers shaders
     const char* vertexText = fichierVersString(vertexPath);
     const char* fragmentText = fichierVersString(fragmentPath);//recupere le texte des shaders 
 
+    //creer un vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexText, NULL);
-    glCompileShader(vertexShader);//creer et compile le vertex shade
+    glCompileShader(vertexShader);//compile le vertex shader
 
     free(vertexText);//libere la memoire allouer pour contenir le texte du shader
  
@@ -71,6 +76,7 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
         printf("la compilation du vertex shader a rate :\n%s\n", InfoCompilation);
     }
 
+    //creer le fragment shader
     unsigned int fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentText, NULL);
@@ -110,223 +116,140 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
 
 unsigned int creerUnCarre()
 {
+    //creer un tableau de Vertices (points ?)
     static float vertices[] = {
-         -0.5f,  -0.5f,  0.0f,  0.0f,   0.0f,
-          0.5f,  -0.5f,  0.0f,  1.0f,   0.0f,
-         -0.5f,   0.5f,  0.0f,  0.0f,   1.0f,
+          //coordonnées (xyz)       //coordonées uv (pour les textures)    
+         -0.5f,  -0.5f,  0.0f,      0.0f,   0.0f,
+          0.5f,  -0.5f,  0.0f,      1.0f,   0.0f,
+         -0.5f,   0.5f,  0.0f,      0.0f,   1.0f,
 
-         -0.5f,   0.5f,  0.0f,  0.0f,   1.0f,
-          0.5f,  -0.5f,  0.0f,  1.0f,   0.0f,
-          0.5f,   0.5f,  0.0f,  1.0f,   1.0f,
+         -0.5f,   0.5f,  0.0f,      0.0f,   1.0f,
+          0.5f,  -0.5f,  0.0f,      1.0f,   0.0f,
+          0.5f,   0.5f,  0.0f,      1.0f,   1.0f,
     };
 
+    //création de l'objet qui stockera les infos de notre carré
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    //creation de la memoire qui stockera le tableau de vertices dans la carte graphique
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    //dis ou trouver les coordonnées géométriques dans ce tableau
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    //dis ou trouver les coordonnées uv dans ce tableau
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    //sort du VAO
     glBindVertexArray(0);
     return VAO;
 }
 
 unsigned int chargerUneTexture(const char* path)
 {
+    //inverse les coordonées uv
     stbi_set_flip_vertically_on_load(1);
 
+    //creer la texture
     unsigned int texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
+    //assigne des parametres a la texture
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    //charge l'image 
     int width, height, nbrChannels;
     unsigned char* data = stbi_load(path, &width, &height, &nbrChannels, 4);
+
+    //si l'image a été correctement chargé
     if (data)
     {
+        //rempli la texture avec l'image précédement chargé en utilisant 4 canals (rouge, bleu, vert, et transparence)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        //creer plein de copie de la texture en divisant la resolution par 2 a chaque fois
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else
     {
+        //message d'erreur
         printf("probleme de chargement d'une texture : %s\n" , path);
         exit(EXIT_FAILURE);
     }
+    //libere l'allocation dynamique qui stocke l'image
     stbi_image_free(data);
 
+    //desactive toutes les textures
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
-}
-
-float carre(float a) {
-    return a * a;
-}
-
-mat4x4 ProjectionOrthographique(float left, float right, float bottom, float top, float zNear, float zFar) {
-    mat4x4 ret = matriceDidentite(1);
-
-    ret.col0.x =  2.0f / (right - left);
-    ret.col1.y =  2.0f / (top - bottom);
-    ret.col2.z = -2.0f / (zFar - zNear);
-
-    ret.col3.x = -(right + left) / (right - left);
-    ret.col3.y = -(top + bottom) / (top - bottom);
-    ret.col3.z = -(zFar + zNear) / (zFar - zNear);
-
-    return ret;
-}
-
-vec4 make_vec4(float x, float y, float z, float w) {
-    return (vec4) {x, y, z, w};
 }
 
 Uniform make_Uniform(const char* name, unsigned int shader){
     return (Uniform) {name, glGetUniformLocation(shader, name)};
 }
 
-vec4 multiplie(vec4 vec, float f)
+Boutton make_Boutton(int x, int y, int h, int l, unsigned int defaultTex, GLFWwindow* win) {
+    return (Boutton) {x, y, h, l, defaultTex, defaultTex, defaultTex, win, false, false};
+}
+
+void setBouttonTextures(Boutton* boutton, unsigned int whenHover, unsigned int whenClicked)
 {
-    return (vec4) {vec.x * f, vec.y * f, vec.z * f, vec.w * f};
+    boutton->textureHover = whenHover;
+    boutton->textureCliquer = whenClicked;
 }
 
-vec4 additionne(vec4 v1, vec4 v2)
+void afficherBoutton(Boutton* boutton, unsigned int shader)
 {
-    return (vec4) {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w};
-}
+    static unsigned int carre = 0;
+    if (!carre) carre = creerUnCarre();
 
-mat4x4 matriceDidentite(float f) {
-    mat4x4 ret;
-    ret.col0 = make_vec4(f, 0, 0, 0);
-    ret.col1 = make_vec4(0, f, 0, 0);
-    ret.col2 = make_vec4(0, 0, f, 0);
-    ret.col3 = make_vec4(0, 0, 0, f);
-    return ret;
-}
+    glUseProgram(shader);
 
-mat4x4 matriceDeTaille(float x, float y, float z) {
-    mat4x4 ret;
-    ret.col0 = make_vec4(x, 0, 0, 0);
-    ret.col1 = make_vec4(0, y, 0, 0);
-    ret.col2 = make_vec4(0, 0, z, 0);
-    ret.col3 = make_vec4(0, 0, 0, 1);
-    return ret;
-}
+    mat4x4 taille = matriceDeTaille(boutton->l, boutton->h, 1);
+    mat4x4 translation = matriceDeTranslation(boutton->x, boutton->y, 0);
+    mat4x4 model = multiplicationDeMatrices(&translation, &taille);
 
-mat4x4 matriceDeTranslation(float x, float y, float z) {
-    mat4x4 ret;
-    ret.col0 = make_vec4(1, 0, 0, 0);
-    ret.col1 = make_vec4(0, 1, 0, 0);
-    ret.col2 = make_vec4(0, 0, 1, 0);
-    ret.col3 = make_vec4(x, y, z, 1);
-    return ret;
-}
+    int width, height;
+    glfwGetWindowSize(boutton->win, &width, &height);
 
-mat4x4 matriceDeRotation(vec4 u, float A)
-{
-    //si l'axe est un vecteur nulle ou si l'angle de rotation est nulle
-    if (u.x == .0f && u.y == .0f && u.z == .0f || A == .0f) return matriceDidentite(1);
+    double x, y;
+    glfwGetCursorPos(boutton->win, &x, &y);
+    //mettre le curseur sur le meme repere que le boutton
+    y = height - y;
 
-    //calcule la norme du vecteur axe
-    size_t norme = sqrt((double)u.x * (double)u.x 
-        + (double)u.y * (double)u.y 
-        + (double)u.z * (double)u.z);
+    //indique si le curseur survole le boutton
+    boutton->hover = 
+        x > (boutton->x - boutton->l * .5) && 
+        x < (boutton->x + boutton->l * .5) && 
+        y > (boutton->y - boutton->h * .5) && 
+        y < (boutton->y + boutton->h * .5);
 
-    //normalise (norme de l'axe = 1.0f)
-    u = multiplie(u, 1.0f / norme);
+    boutton->clicker = (boutton->hover && glfwGetMouseButton(boutton->win, GLFW_MOUSE_BUTTON_LEFT));
+    
+    glActiveTexture(GL_TEXTURE0);
+    if (boutton->clicker) {
+        glBindTexture(GL_TEXTURE_2D, boutton->textureCliquer);
+    }
+    else if (boutton->hover) {
+        glBindTexture(GL_TEXTURE_2D, boutton->textureHover);
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, boutton->textureDefault);
+    }
 
-    //composer la matrice
-    mat4x4 ret;
-    ret.col0 = make_vec4(cos(A) + carre(u.x) * (1 - cos(A))      , u.y * u.x * (1 - cos(A)) + u.z * sin(A) , u.z * u.x * (1 - cos(A)) - u.y * sin(A) , 0     );
-    ret.col1 = make_vec4(u.x * u.y * (1 - cos(A)) - u.z * sin(A) , cos(A) + carre(u.y) * (1 - cos(A))      , u.z * u.y * (1 - cos(A)) - u.x * sin(A) , 0     );
-    ret.col2 = make_vec4(u.x * u.z * (1 - cos(A)) - u.y * sin(A) , u.y * u.z * (1 - cos(A)) - u.x * sin(A) , cos(A) + carre(u.z) * (1 - cos(A))      , 0     );
-    ret.col3 = make_vec4(0                                       , 0                                       , 0                                       , 1     );
-    return ret;
-}
+    printf("x : %f, y : %f\n", (float)x, (float)y);
 
-mat4x4 multiplicationDeMatrices(mat4x4* m1, mat4x4* m2)
-{
-    const vec4 SrcA0 = m1->col0;
-    const vec4 SrcA1 = m1->col1;
-    const vec4 SrcA2 = m1->col2;
-    const vec4 SrcA3 = m1->col3;
-           
-    const vec4 SrcB0 = m2->col0;
-    const vec4 SrcB1 = m2->col1;
-    const vec4 SrcB2 = m2->col2;
-    const vec4 SrcB3 = m2->col3;
-
-
-    mat4x4 ret;
-    ret.col0 = additionne(additionne(multiplie(SrcA0, SrcB0.x), multiplie(SrcA1, SrcB0.y)), additionne(multiplie(SrcA2, SrcB0.z), multiplie(SrcA3, SrcB0.w)));
-    ret.col1 = additionne(additionne(multiplie(SrcA0, SrcB1.x), multiplie(SrcA1, SrcB1.y)), additionne(multiplie(SrcA2, SrcB1.z), multiplie(SrcA3, SrcB1.w)));
-    ret.col2 = additionne(additionne(multiplie(SrcA0, SrcB2.x), multiplie(SrcA1, SrcB2.y)), additionne(multiplie(SrcA2, SrcB2.z), multiplie(SrcA3, SrcB2.w)));
-    ret.col3 = additionne(additionne(multiplie(SrcA0, SrcB3.x), multiplie(SrcA1, SrcB3.y)), additionne(multiplie(SrcA2, SrcB3.z), multiplie(SrcA3, SrcB3.w)));
-    return ret;
-}
-
-mat4x4 projectionPerspective(float aspect, float fov, float zNear, float zFar){
-    const float tanDemiFov = tan(fov * .5f);
-    const float zPortee = zNear - zFar;
-
-    mat4x4 ret;
-    ret.col0 = make_vec4(1.0f / (aspect * tanDemiFov), 0                , 0                            , 0);
-    ret.col1 = make_vec4(0                           , 1.0f / tanDemiFov, 0                            , 0);
-    ret.col2 = make_vec4(0                           , 0                , -(-zNear - zFar) / zPortee   ,-1);
-    ret.col3 = make_vec4(0                           , 0                , 2.0f * zFar * zNear / zPortee, 0);
-    return ret;
-}
-
-mat4x4 matriceDeVue(const vec4 eyePos, const vec4 lookAt, const vec4 up) {
-    mat4x4 ret = matriceDidentite(1);
-
-    const vec4 f = normalise(additionne(lookAt, multiplie(eyePos, -1.0f)));
-    const vec4 s = normalise(produitVectoriel(f, up));
-    const vec4 u = produitVectoriel(s, f);
-
-
-    ret.col0.x = s.x;
-    ret.col1.x = s.y;
-    ret.col2.x = s.z;
-    ret.col0.y = u.x;
-    ret.col1.y = u.y;
-    ret.col2.y = u.z;
-    ret.col0.z = -f.x;
-    ret.col1.z = -f.y;
-    ret.col2.z = -f.z;
-    ret.col3.x = -produitScalaire(s, eyePos);
-    ret.col3.y = -produitScalaire(u, eyePos);
-    ret.col3.z = produitScalaire(f, eyePos);
-                               
-    return ret;
-}
-
-vec4 produitVectoriel(vec4 A, vec4 B)
-{
-    vec4 ret = make_vec4(0,0,0,1);
-    ret.x = A.y * B.z - A.z * B.y;
-    ret.y = A.z * B.x - A.x * B.z;
-    ret.z = A.x * B.y - A.y * B.x;
-    ret.w = 1;
-    return ret;
-}
-
-float produitScalaire(vec4 A, vec4 B) 
-{
-    return A.x * B.x + A.y * B.y + A.z * B.z;
-}
-
-vec4 normalise(vec4 a) {
-    return multiplie(a, 1.0f / sqrt(carre(a.x) + carre(a.y) + carre(a.z)));
+    glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, &model.col0.x);
+    glBindVertexArray(carre);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }

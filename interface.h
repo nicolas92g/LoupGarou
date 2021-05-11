@@ -3,30 +3,38 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "glmath.h"
+#include <stdbool.h>
+
 #define PI 3.141592
 
-typedef struct vec4 {
-	float x;
-	float y;
-	float z;
-	float w;
-} vec4;
-
-typedef struct mat4x4 {
-	vec4 col0;
-	vec4 col1;
-	vec4 col2;
-	vec4 col3;
-}mat4x4;
-
+/**
+ * @brief definit une variable shader de type uniform
+ */
 typedef struct Uniform {
 	const char* name;
 	unsigned int location;
 }Uniform;
+/**
+ * @brief definit un boutton 2D, sa position et les différentes textures qu'il peut avoir
+ */
+typedef struct Boutton {
+	int x;		//position x   (en pixel)
+	int y;		//position y   (en pixel)
+	int h;		// hauteur 	   (en pixel)
+	int l;		// largeur	   (en pixel)
+	unsigned int textureDefault;
+	unsigned int textureHover;
+	unsigned int textureCliquer;
+	GLFWwindow* win;
+	bool clicker;
+	bool hover;
+} Boutton;
 
 /**
  * @brief creer une fenetre avec glfw
@@ -52,28 +60,20 @@ unsigned int creerUnCarre();
  * @brief creer une texture a partir d'un fichier (.png, .jpg, etc..)
  */
 unsigned int chargerUneTexture(const char* path);
-
+/**
+ * @brief permet de creer un uniform 
+ * @param nom de la variable dans le shader
+ * @param id du shader en question
+ */
 Uniform make_Uniform(const char* name, unsigned int shader);
 
-float carre(float a);
-
-vec4 make_vec4(float x, float y, float z, float w);
-vec4 multiplie(vec4 vec, float f);
-vec4 additionne(vec4 v1, vec4 v2);
+Boutton make_Boutton(int x, int y, int h, int l, unsigned int defaultTex, GLFWwindow* win);
 
 /**
- * @brief creer une matrice de projection orthographique (sans perspective) adapté au 2D
+ * @brief permet de changer rapidement les textures d'un boutton
  */
-mat4x4 ProjectionOrthographique(float left, float right, float bottom, float top, float zNear, float zFar);
-mat4x4 projectionPerspective(float aspect, float fov, float zNear, float zFar);
-mat4x4 matriceDidentite(float facteur);
-mat4x4 matriceDeTaille(float x, float y, float z);
-mat4x4 matriceDeTranslation(float x, float y, float z);
-mat4x4 matriceDeRotation(vec4 axe, float angle);
-mat4x4 multiplicationDeMatrices(mat4x4* m1, mat4x4* m2);
-mat4x4 matriceDeVue(const vec4 eyePos, const vec4 lookAt, const vec4 up);
-vec4 produitVectoriel(vec4 A, vec4 B);
-float produitScalaire(vec4 A, vec4 B);
-vec4 normalise(vec4 a);
+void setBouttonTextures(Boutton* boutton, unsigned int whenHover, unsigned int whenClicked);
+
+void afficherBoutton(Boutton* boutton, unsigned int shader);
 
 #endif // !INTERFACE
