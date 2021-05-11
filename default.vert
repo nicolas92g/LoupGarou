@@ -6,9 +6,10 @@ out vec3 col;
 out vec2 uv;
 
 uniform mat4 projection;
+uniform mat4 vue; 
 uniform mat4 model;
 
 void main(){
-	gl_Position =  projection * model * vec4(pos , 1);
+	gl_Position =  projection * vue * model * vec4(pos , 1);
 	uv = inUv;
 }

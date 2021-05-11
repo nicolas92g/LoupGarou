@@ -26,6 +26,7 @@ int main() {
 
     Uniform projectionUniform = make_Uniform("projection", shader);
     Uniform modelUniform = make_Uniform("model", shader);
+    Uniform vueUniform = make_Uniform("vue", shader);
 
     while (!glfwWindowShouldClose(fenetre))
     {
@@ -34,7 +35,8 @@ int main() {
         static mat4x4 taille;
         static mat4x4 translation;
         static mat4x4 rotation;
-        
+        static mat4x4 vue;
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shader);
@@ -43,13 +45,17 @@ int main() {
         glfwGetWindowSize(fenetre, &width, &height);
 
         glViewport(0, 0, width, height);
-        //projection = projectionPerspective(((float)width / (float)height), PI * .5f, 0.1f, 100.0f);
-        projection = ProjectionOrthographique(0, width, 0, height, -1.0f, 10.0f);
+        projection = projectionPerspective(((float)width / (float)height), PI * 0.5f, 0.1f, 100.0f);
+        //projection = ProjectionOrthographique(0, width, 0, height, -10.0f, 10.0f);
 
         glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.col0.x);
 
-        taille = matriceDeTaille(100, 100, 1);
-        translation = matriceDeTranslation(200, 100, 0);
+        vue = matriceDeVue(make_vec4(2, 2, 2, 1), make_vec4(0, 0, 0, 1), make_vec4(0, 0, 1, 1));
+
+        glUniformMatrix4fv(vueUniform.location, 1, GL_FALSE, &vue.col0.x);
+
+        taille = matriceDeTaille(1, 1, 1);
+        translation = matriceDeTranslation(0, 0, 0);
         rotation = matriceDeRotation(make_vec4(0, 1, 0, 0), PI * .3f * glfwGetTime());
 
         mat4x4 modelIntermediaire = multiplicationDeMatrices(&translation, &taille);

@@ -73,6 +73,7 @@ mat4x4 matriceDeRotation(vec4 axe, float angle);
 mat4x4 multiplicationDeMatrices(mat4x4* m1, mat4x4* m2);
 mat4x4 matriceDeVue(const vec4 eyePos, const vec4 lookAt, const vec4 up);
 vec4 produitVectoriel(vec4 A, vec4 B);
+float produitScalaire(vec4 A, vec4 B);
 vec4 normalise(vec4 a);
 
 #endif // !INTERFACE

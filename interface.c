@@ -8,6 +8,7 @@ void creerLaFenetre(GLFWwindow** window) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 128);
 
     *window = glfwCreateWindow(800, 600, "Jeu de Loup Garou", NULL, NULL);
 
@@ -282,22 +283,32 @@ mat4x4 projectionPerspective(float aspect, float fov, float zNear, float zFar){
     mat4x4 ret;
     ret.col0 = make_vec4(1.0f / (aspect * tanDemiFov), 0                , 0                            , 0);
     ret.col1 = make_vec4(0                           , 1.0f / tanDemiFov, 0                            , 0);
-    ret.col2 = make_vec4(0                           , 0                , (-zNear - zFar) / zPortee    , 1);
+    ret.col2 = make_vec4(0                           , 0                , -(-zNear - zFar) / zPortee   ,-1);
     ret.col3 = make_vec4(0                           , 0                , 2.0f * zFar * zNear / zPortee, 0);
     return ret;
 }
 
 mat4x4 matriceDeVue(const vec4 eyePos, const vec4 lookAt, const vec4 up) {
-    mat4x4 ret;
+    mat4x4 ret = matriceDidentite(1);
 
-    const vec4 zaxis = normalise(additionne(lookAt, multiplie(eyePos, -1.0f)));
-    const vec4 xaxis = normalise(produitVectoriel(up, zaxis));
-    const vec4 yaxis = produitVectoriel(zaxis, xaxis);
+    const vec4 f = normalise(additionne(lookAt, multiplie(eyePos, -1.0f)));
+    const vec4 s = normalise(produitVectoriel(f, up));
+    const vec4 u = produitVectoriel(s, f);
 
-    ret.col0 = make_vec4(xaxis.x, xaxis.y, xaxis.z, -produitScalaire(xaxis, eyePos));
-    ret.col1 = make_vec4(yaxis.x, yaxis.y, yaxis.z, -produitScalaire(yaxis, eyePos));
-    ret.col2 = make_vec4(zaxis.x, zaxis.y, zaxis.z, -produitScalaire(zaxis, eyePos));
-    ret.col3 = make_vec4(0      ,0       , 0      , 1                              );
+
+    ret.col0.x = s.x;
+    ret.col1.x = s.y;
+    ret.col2.x = s.z;
+    ret.col0.y = u.x;
+    ret.col1.y = u.y;
+    ret.col2.y = u.z;
+    ret.col0.z = -f.x;
+    ret.col1.z = -f.y;
+    ret.col2.z = -f.z;
+    ret.col3.x = -produitScalaire(s, eyePos);
+    ret.col3.y = -produitScalaire(u, eyePos);
+    ret.col3.z = produitScalaire(f, eyePos);
+                               
     return ret;
 }
 
