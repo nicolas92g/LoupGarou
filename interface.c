@@ -1,4 +1,5 @@
 #include "interface.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -109,13 +110,13 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
 unsigned int creerUnCarre()
 {
     static float vertices[] = {
-         0.0f,  0.0f,
-         1.0f,  0.0f,
-         0.0f,  1.0f,
+         -0.5f,  -0.5f,  0.0f,  0.0f,   0.0f,
+          0.5f,  -0.5f,  0.0f,  1.0f,   0.0f,
+         -0.5f,   0.5f,  0.0f,  0.0f,   1.0f,
 
-         0.0f,  1.0f,
-         1.0f,  0.0f,
-         1.0f,  1.0f
+         -0.5f,   0.5f,  0.0f,  0.0f,   1.0f,
+          0.5f,  -0.5f,  0.0f,  1.0f,   0.0f,
+          0.5f,   0.5f,  0.0f,  1.0f,   1.0f,
     };
 
     unsigned int VAO;
@@ -127,10 +128,13 @@ unsigned int creerUnCarre()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //glBindVertexArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
     return VAO;
 }
 
@@ -165,16 +169,20 @@ unsigned int chargerUneTexture(const char* path)
     return texture;
 }
 
+float carre(float a) {
+    return a * a;
+}
+
 mat4x4 ProjectionOrthographique(float left, float right, float bottom, float top, float zNear, float zFar) {
     mat4x4 ret = matriceDidentite(1);
 
-    ret.line0.x =  2.0f / (right - left);
-    ret.line1.y =  2.0f / (top - bottom);
-    ret.line2.z = -2.0f / (zFar - zNear);
+    ret.col0.x =  2.0f / (right - left);
+    ret.col1.y =  2.0f / (top - bottom);
+    ret.col2.z = -2.0f / (zFar - zNear);
 
-    ret.line3.x = -(right + left) / (right - left);
-    ret.line3.y = -(top + bottom) / (top - bottom);
-    ret.line3.z = -(zFar + zNear) / (zFar - zNear);
+    ret.col3.x = -(right + left) / (right - left);
+    ret.col3.y = -(top + bottom) / (top - bottom);
+    ret.col3.z = -(zFar + zNear) / (zFar - zNear);
 
     return ret;
 }
@@ -187,40 +195,127 @@ Uniform make_Uniform(const char* name, unsigned int shader){
     return (Uniform) {name, glGetUniformLocation(shader, name)};
 }
 
+vec4 multiplie(vec4 vec, float f)
+{
+    return (vec4) {vec.x * f, vec.y * f, vec.z * f, vec.w * f};
+}
+
+vec4 additionne(vec4 v1, vec4 v2)
+{
+    return (vec4) {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w};
+}
+
 mat4x4 matriceDidentite(float f) {
     mat4x4 ret;
-    ret.line0 = make_vec4(f, 0, 0, 0);
-    ret.line1 = make_vec4(0, f, 0, 0);
-    ret.line2 = make_vec4(0, 0, f, 0);
-    ret.line3 = make_vec4(0, 0, 0, f);
+    ret.col0 = make_vec4(f, 0, 0, 0);
+    ret.col1 = make_vec4(0, f, 0, 0);
+    ret.col2 = make_vec4(0, 0, f, 0);
+    ret.col3 = make_vec4(0, 0, 0, f);
     return ret;
 }
 
 mat4x4 matriceDeTaille(float x, float y, float z) {
     mat4x4 ret;
-    ret.line0 = make_vec4(x, 0, 0, 0);
-    ret.line1 = make_vec4(0, y, 0, 0);
-    ret.line2 = make_vec4(0, 0, z, 0);
-    ret.line3 = make_vec4(0, 0, 0, 1);
+    ret.col0 = make_vec4(x, 0, 0, 0);
+    ret.col1 = make_vec4(0, y, 0, 0);
+    ret.col2 = make_vec4(0, 0, z, 0);
+    ret.col3 = make_vec4(0, 0, 0, 1);
     return ret;
 }
 
 mat4x4 matriceDeTranslation(float x, float y, float z) {
     mat4x4 ret;
-    ret.line0 = make_vec4(1, 0, 0, x);
-    ret.line1 = make_vec4(0, 1, 0, y);
-    ret.line2 = make_vec4(0, 0, 1, z);
-    ret.line3 = make_vec4(0, 0, 0, 1);
+    ret.col0 = make_vec4(1, 0, 0, 0);
+    ret.col1 = make_vec4(0, 1, 0, 0);
+    ret.col2 = make_vec4(0, 0, 1, 0);
+    ret.col3 = make_vec4(x, y, z, 1);
+    return ret;
+}
+
+mat4x4 matriceDeRotation(vec4 u, float A)
+{
+    //si l'axe est un vecteur nulle ou si l'angle de rotation est nulle
+    if (u.x == .0f && u.y == .0f && u.z == .0f || A == .0f) return matriceDidentite(1);
+
+    //calcule la norme du vecteur axe
+    size_t norme = sqrt((double)u.x * (double)u.x 
+        + (double)u.y * (double)u.y 
+        + (double)u.z * (double)u.z);
+
+    //normalise (norme de l'axe = 1.0f)
+    u = multiplie(u, 1.0f / norme);
+
+    //composer la matrice
+    mat4x4 ret;
+    ret.col0 = make_vec4(cos(A) + carre(u.x) * (1 - cos(A))      , u.y * u.x * (1 - cos(A)) + u.z * sin(A) , u.z * u.x * (1 - cos(A)) - u.y * sin(A) , 0     );
+    ret.col1 = make_vec4(u.x * u.y * (1 - cos(A)) - u.z * sin(A) , cos(A) + carre(u.y) * (1 - cos(A))      , u.z * u.y * (1 - cos(A)) - u.x * sin(A) , 0     );
+    ret.col2 = make_vec4(u.x * u.z * (1 - cos(A)) - u.y * sin(A) , u.y * u.z * (1 - cos(A)) - u.x * sin(A) , cos(A) + carre(u.z) * (1 - cos(A))      , 0     );
+    ret.col3 = make_vec4(0                                       , 0                                       , 0                                       , 1     );
     return ret;
 }
 
 mat4x4 multiplicationDeMatrices(mat4x4* m1, mat4x4* m2)
 {
+    const vec4 SrcA0 = m1->col0;
+    const vec4 SrcA1 = m1->col1;
+    const vec4 SrcA2 = m1->col2;
+    const vec4 SrcA3 = m1->col3;
+           
+    const vec4 SrcB0 = m2->col0;
+    const vec4 SrcB1 = m2->col1;
+    const vec4 SrcB2 = m2->col2;
+    const vec4 SrcB3 = m2->col3;
+
+
     mat4x4 ret;
-    ret.line0 = make_vec4(m1->line0.x * m2->line0.x, m1->line0.y * m2->line0.y, m1->line0.z * m2->line0.z, m1->line0.w * m2->line0.w);
-    ret.line1 = make_vec4(m1->line1.x * m2->line1.x, m1->line1.y * m2->line1.y, m1->line1.z * m2->line1.z, m1->line1.w * m2->line1.w);
-    ret.line2 = make_vec4(m1->line2.x * m2->line2.x, m1->line2.y * m2->line2.y, m1->line2.z * m2->line2.z, m1->line2.w * m2->line2.w);
-    ret.line3 = make_vec4(m1->line3.x * m2->line3.x, m1->line3.y * m2->line3.y, m1->line3.z * m2->line3.z, m1->line3.w * m2->line3.w);
+    ret.col0 = additionne(additionne(multiplie(SrcA0, SrcB0.x), multiplie(SrcA1, SrcB0.y)), additionne(multiplie(SrcA2, SrcB0.z), multiplie(SrcA3, SrcB0.w)));
+    ret.col1 = additionne(additionne(multiplie(SrcA0, SrcB1.x), multiplie(SrcA1, SrcB1.y)), additionne(multiplie(SrcA2, SrcB1.z), multiplie(SrcA3, SrcB1.w)));
+    ret.col2 = additionne(additionne(multiplie(SrcA0, SrcB2.x), multiplie(SrcA1, SrcB2.y)), additionne(multiplie(SrcA2, SrcB2.z), multiplie(SrcA3, SrcB2.w)));
+    ret.col3 = additionne(additionne(multiplie(SrcA0, SrcB3.x), multiplie(SrcA1, SrcB3.y)), additionne(multiplie(SrcA2, SrcB3.z), multiplie(SrcA3, SrcB3.w)));
     return ret;
 }
 
+mat4x4 projectionPerspective(float aspect, float fov, float zNear, float zFar){
+    const float tanDemiFov = tan(fov * .5f);
+    const float zPortee = zNear - zFar;
+
+    mat4x4 ret;
+    ret.col0 = make_vec4(1.0f / (aspect * tanDemiFov), 0                , 0                            , 0);
+    ret.col1 = make_vec4(0                           , 1.0f / tanDemiFov, 0                            , 0);
+    ret.col2 = make_vec4(0                           , 0                , (-zNear - zFar) / zPortee    , 1);
+    ret.col3 = make_vec4(0                           , 0                , 2.0f * zFar * zNear / zPortee, 0);
+    return ret;
+}
+
+mat4x4 matriceDeVue(const vec4 eyePos, const vec4 lookAt, const vec4 up) {
+    mat4x4 ret;
+
+    const vec4 zaxis = normalise(additionne(lookAt, multiplie(eyePos, -1.0f)));
+    const vec4 xaxis = normalise(produitVectoriel(up, zaxis));
+    const vec4 yaxis = produitVectoriel(zaxis, xaxis);
+
+    ret.col0 = make_vec4(xaxis.x, xaxis.y, xaxis.z, -produitScalaire(xaxis, eyePos));
+    ret.col1 = make_vec4(yaxis.x, yaxis.y, yaxis.z, -produitScalaire(yaxis, eyePos));
+    ret.col2 = make_vec4(zaxis.x, zaxis.y, zaxis.z, -produitScalaire(zaxis, eyePos));
+    ret.col3 = make_vec4(0      ,0       , 0      , 1                              );
+    return ret;
+}
+
+vec4 produitVectoriel(vec4 A, vec4 B)
+{
+    vec4 ret = make_vec4(0,0,0,1);
+    ret.x = A.y * B.z - A.z * B.y;
+    ret.y = A.z * B.x - A.x * B.z;
+    ret.z = A.x * B.y - A.y * B.x;
+    ret.w = 1;
+    return ret;
+}
+
+float produitScalaire(vec4 A, vec4 B) 
+{
+    return A.x * B.x + A.y * B.y + A.z * B.z;
+}
+
+vec4 normalise(vec4 a) {
+    return multiplie(a, 1.0f / sqrt(carre(a.x) + carre(a.y) + carre(a.z)));
+}

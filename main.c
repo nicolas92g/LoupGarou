@@ -25,15 +25,15 @@ int main() {
     unsigned int texture = chargerUneTexture(PROJECT_PATH"image.png");
 
     Uniform projectionUniform = make_Uniform("projection", shader);
-    Uniform tailleUniform = make_Uniform("taille", shader);
-    Uniform positionUniform = make_Uniform("position", shader);
+    Uniform modelUniform = make_Uniform("model", shader);
 
     while (!glfwWindowShouldClose(fenetre))
     {
         static mat4x4 projection;
         static mat4x4 model;
-        static mat4x4 translation;
         static mat4x4 taille;
+        static mat4x4 translation;
+        static mat4x4 rotation;
         
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -41,28 +41,22 @@ int main() {
 
         int width, height;
         glfwGetWindowSize(fenetre, &width, &height);
+
+        glViewport(0, 0, width, height);
+        //projection = projectionPerspective(((float)width / (float)height), PI * .5f, 0.1f, 100.0f);
         projection = ProjectionOrthographique(0, width, 0, height, -1.0f, 10.0f);
 
-        glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.line0.x);
-        
-        taille = matriceDeTaille(100, 100, 10);
-        translation = matriceDeTranslation(100, 100, 0);
-        //model =  multiplicationDeMatrices(&taille, &translation);
+        glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.col0.x);
 
-        glUniformMatrix4fv(tailleUniform.location, 1, GL_FALSE, &taille.line0.x);
-        glUniformMatrix4fv(positionUniform.location, 1, GL_FALSE, &translation.line0.x);
+        taille = matriceDeTaille(100, 100, 1);
+        translation = matriceDeTranslation(200, 100, 0);
+        rotation = matriceDeRotation(make_vec4(0, 1, 0, 0), PI * .3f * glfwGetTime());
+
+        mat4x4 modelIntermediaire = multiplicationDeMatrices(&translation, &taille);
+        model = multiplicationDeMatrices(&modelIntermediaire, &rotation);
+
+        glUniformMatrix4fv(modelUniform.location, 1, GL_FALSE, &model.col0.x);
         
-        printf("my function\n");
-        printf("----\n\n");
-        for (size_t i = 0; i < 16; i++)
-        {
-            printf("%f\t ", (&taille.line0.x)[i]);
-            if (!((i + 1) % 4)) {
-                printf("\n");
-            }
-        }
-        printf("\n----");
-        //exit(0);
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
