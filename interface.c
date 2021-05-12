@@ -217,7 +217,7 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
 {
     //creer un seul carre pour chaque boutton 
     static unsigned int carre = 0;
-    if (!carre) { carre = creerUnCarre(); printf("creer un carre\n"); }
+    if (!carre) carre = creerUnCarre(); 
 
     //utilise le shader mis en parametre
     glUseProgram(shader);

@@ -30,8 +30,20 @@ int main() {
     unsigned int voyanteTexture = chargerUneTexture(PROJECT_PATH"voyante.png");
     unsigned int voleurTexture = chargerUneTexture(PROJECT_PATH"voleur.png");
     unsigned int versoTexture = chargerUneTexture(PROJECT_PATH"verso.png");
+    unsigned int petiteFilleTexture = chargerUneTexture(PROJECT_PATH"petiteFille.png");
+    unsigned int cupidonTexture = chargerUneTexture(PROJECT_PATH"cupidon.png");
+    unsigned int chasseurTexture = chargerUneTexture(PROJECT_PATH"chasseur.png");
+    unsigned int sorciereTexture = chargerUneTexture(PROJECT_PATH"sorciere.png");
+    unsigned int capitaineTexture = chargerUneTexture(PROJECT_PATH"capitaine.png");
 
-    Carte carteLoupGarou = make_Carte(villageoisTexture);
+    Carte carteLoupGarou = make_Carte(loupGarouTexture);
+    Carte carteVillageois = make_Carte(villageoisTexture);
+    Carte cartevoyante = make_Carte(voyanteTexture);
+    Carte cartePetiteFille = make_Carte(petiteFilleTexture);
+    Carte carteCupidon = make_Carte(cupidonTexture);
+    Carte carteChasseur = make_Carte(chasseurTexture);
+    Carte carteSorciere = make_Carte(sorciereTexture);
+    Carte carteVoleur = make_Carte(voleurTexture);
 
     Uniform projectionUniform = make_Uniform("projection", shader);
     Uniform modelUniform = make_Uniform("model", shader);
@@ -61,14 +73,59 @@ int main() {
         //3D
         glDepthFunc(GL_LEQUAL);
         projection = projectionPerspective(((float)width / (float)height), PI * 0.25f, 0.1f, 100.0f);
-        vue = matriceDeVue(make_vec4(cos(glfwGetTime()) * 10, 4, sin(glfwGetTime()) * 10, 1), make_vec4(0, 0, 0, 1), make_vec4(0, 1, 0, 1));
+        vue = matriceDeVue(make_vec4(0, cos(glfwGetTime() * 0.2) * 15, -15, 1), make_vec4(0, 0, 0, 1), make_vec4(0, 1, 0, 1));
 
         glUniformMatrix4fv(vueUniform.location, 1, GL_FALSE, &vue.col0.x);
         glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.col0.x);
 
+        carteLoupGarou.axeRotation = make_vec4(0, 1, 0, 1);
+        carteLoupGarou.angle = glfwGetTime();
+        carteLoupGarou.position = make_vec4(cos(glfwGetTime()* 0.2) * 6, 0, sin(glfwGetTime() * 0.2) * 6, 1);
         
-
         afficherCarte(&carteLoupGarou, shader);
+
+        carteVillageois.axeRotation = make_vec4(0, 1, 0, 1);
+        carteVillageois.angle = glfwGetTime() - PI * .25;
+        carteVillageois.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .25) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .25) * 6, 1);
+
+        afficherCarte(&carteVillageois, shader);
+
+        cartevoyante.axeRotation = make_vec4(0, 1, 0, 1);
+        cartevoyante.angle = glfwGetTime() - PI * .5;
+        cartevoyante.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .5) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .5) * 6, 1);
+
+        afficherCarte(&cartevoyante, shader);
+
+        cartePetiteFille.axeRotation = make_vec4(0, 1, 0, 1);
+        cartePetiteFille.angle = glfwGetTime() - PI * .75;
+        cartePetiteFille.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .75) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .75) * 6, 1);
+
+        afficherCarte(&cartePetiteFille, shader);
+
+        carteCupidon.axeRotation = make_vec4(0, 1, 0, 1);
+        carteCupidon.angle = glfwGetTime() - PI;
+        carteCupidon.position = make_vec4(cos(glfwGetTime() * 0.2 + PI ) * 6, 0, sin(glfwGetTime() * 0.2 + PI) * 6, 1);
+
+        afficherCarte(&carteCupidon, shader);
+
+        carteChasseur.axeRotation = make_vec4(0, 1, 0, 1);
+        carteChasseur.angle = glfwGetTime() - PI * 1.25;
+        carteChasseur.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.25) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.25) * 6, 1);
+
+        afficherCarte(&carteChasseur, shader);
+
+        carteSorciere.axeRotation = make_vec4(0, 1, 0, 1);
+        carteSorciere.angle = glfwGetTime() - PI * 1.5;
+        carteSorciere.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.5) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.5) * 6, 1);
+
+        afficherCarte(&carteSorciere, shader);
+
+        carteVoleur.axeRotation = make_vec4(0, 1, 0, 1);
+        carteVoleur.angle = glfwGetTime() - PI * 1.75;
+        carteVoleur.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.75) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.75) * 6, 1);
+
+        afficherCarte(&carteVoleur, shader);
+
 
         //2D
         glDepthFunc(GL_ALWAYS);
