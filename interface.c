@@ -11,24 +11,28 @@ void creerLaFenetre(GLFWwindow** window) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);//on utilise opengl 3.3
 
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_SAMPLES, 128);
+    glfwWindowHint(GLFW_SAMPLES, 32);//active le multisampling avec 32 samples par pixels
 
-    *window = glfwCreateWindow(800, 600, "Jeu de Loup Garou", NULL, NULL);
+    *window = glfwCreateWindow(800, 600, "Jeu de Loup Garou", NULL, NULL);//on creer la fenetre
 
+    //on teste si la fentre a été créée correctement
     if (*window == NULL)
     {
         printf("la fenetre n'a pas reussie a etre creer\n");
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
+    //on creer un context opengl
     glfwMakeContextCurrent(*window);
 
+    //on initialise glad qui permet d'utilise opengl
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         printf("glad ne s'est pas initialise correctement\n");
         exit(EXIT_FAILURE);
     }
 
+    //on met le viewport a la taille actuelle de la fenetre
     glViewport(0, 0, 800, 600);
 }
 
@@ -195,36 +199,43 @@ unsigned int chargerUneTexture(const char* path)
 }
 
 Uniform make_Uniform(const char* name, unsigned int shader){
-    return (Uniform) {name, glGetUniformLocation(shader, name)};
+    return (Uniform) {name, glGetUniformLocation(shader, name)};//recupere la position de la variable dans le shader
 }
 
 Boutton make_Boutton(int x, int y, int h, int l, unsigned int defaultTex, GLFWwindow* win) {
-    return (Boutton) {x, y, h, l, defaultTex, defaultTex, defaultTex, win, false, false};
+    return (Boutton) {x, y, h, l, defaultTex, defaultTex, defaultTex, .0f, make_vec4(1,1,1,1), win, false, false};
 }
 
 void setBouttonTextures(Boutton* boutton, unsigned int whenHover, unsigned int whenClicked)
 {
+    //assigne les textures dynamiques
     boutton->textureHover = whenHover;
     boutton->textureCliquer = whenClicked;
 }
 
 void afficherBoutton(Boutton* boutton, unsigned int shader)
 {
+    //creer un seul carre pour chaque boutton 
     static unsigned int carre = 0;
-    if (!carre) carre = creerUnCarre();
+    if (!carre) { carre = creerUnCarre(); printf("creer un carre\n"); }
 
+    //utilise le shader mis en parametre
     glUseProgram(shader);
 
+    //genere un nouvelle matrice model
     mat4x4 taille = matriceDeTaille(boutton->l, boutton->h, 1);
     mat4x4 translation = matriceDeTranslation(boutton->x, boutton->y, 0);
     mat4x4 model = multiplicationDeMatrices(&translation, &taille);
 
-    int width, height;
-    glfwGetWindowSize(boutton->win, &width, &height);
+    //recupere la hauteur de la fenetre 
+    int height;
+    glfwGetWindowSize(boutton->win, NULL, &height);
 
+    //recupere la position du curseur
     double x, y;
     glfwGetCursorPos(boutton->win, &x, &y);
-    //mettre le curseur sur le meme repere que le boutton
+
+    //met le curseur sur le meme repere que le boutton
     y = height - y;
 
     //indique si le curseur survole le boutton
@@ -234,8 +245,10 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
         y > (boutton->y - boutton->h * .5) && 
         y < (boutton->y + boutton->h * .5);
 
+    //indique si le boutton est cliquer
     boutton->clicker = (boutton->hover && glfwGetMouseButton(boutton->win, GLFW_MOUSE_BUTTON_LEFT));
     
+    //choisit la bonne texture
     glActiveTexture(GL_TEXTURE0);
     if (boutton->clicker) {
         glBindTexture(GL_TEXTURE_2D, boutton->textureCliquer);
@@ -247,9 +260,61 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
         glBindTexture(GL_TEXTURE_2D, boutton->textureDefault);
     }
 
-    printf("x : %f, y : %f\n", (float)x, (float)y);
+    //assigne la matrice généré dans le shader
+    glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, &model.col0.x);
+
+    //assigne les filtres dans le shader
+    glUniform1f(glGetUniformLocation(shader, "alpha"), boutton->alpha);
+    glUniform3fv(glGetUniformLocation(shader, "filtre"), 1, &boutton->filter);
+
+    glBindVertexArray(carre);
+    //affiche le boutton
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    //remetre les filtres par defaults
+    glUniform1f(glGetUniformLocation(shader, "alpha"), 0.0f);
+    glUniform3f(glGetUniformLocation(shader, "filtre"), 1, 1, 1);
+}
+
+Carte make_Carte(unsigned int texture){
+    //charger une texture de verso pour toutes les cartes
+    static unsigned int verso = 0;
+    if (!verso) verso = chargerUneTexture(PROJECT_PATH"verso.png");
+    //creer la carte
+    return (Carte){make_vec4(0,0,0,1), make_vec4(0, 0, 1, 1), .0f, texture, verso};
+}
+
+void afficherCarte(Carte* carte, unsigned int shader)
+{
+    glEnable(GL_CULL_FACE);
+    glUseProgram(shader);
+
+    static mat4x4 taille, translation, rotation, modelIntermediaire, model;
+    static unsigned int carre = 0;
+    if (!carre) carre = creerUnCarre();
+
+    taille = matriceDeTaille(3, 3, 1);
+    translation = matriceDeTranslation(carte->position.x, carte->position.y, carte->position.z);
+    rotation = matriceDeRotation(carte->axeRotation, carte->angle);
+
+    modelIntermediaire = multiplicationDeMatrices(&translation, &taille);
+    model = multiplicationDeMatrices(&modelIntermediaire, &rotation);
 
     glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, &model.col0.x);
+
     glBindVertexArray(carre);
+
+    glCullFace(GL_BACK);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, carte->textureRecto);
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glCullFace(GL_FRONT);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, carte->textureVerso);
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glCullFace(GL_BACK);
 }
