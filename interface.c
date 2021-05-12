@@ -34,6 +34,8 @@ void creerLaFenetre(GLFWwindow** window) {
 
     //on met le viewport a la taille actuelle de la fenetre
     glViewport(0, 0, 800, 600);
+
+    glfwSetInputMode(*window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_FALSE);
 }
 
 char* fichierVersString(const char* filename)  {
@@ -122,14 +124,14 @@ unsigned int creerUnCarre()
 {
     //creer un tableau de Vertices (points ?)
     static float vertices[] = {
-          //coordonnées (xyz)       //coordonées uv (pour les textures)    
-         -0.5f,  -0.5f,  0.0f,      0.0f,   0.0f,
-          0.5f,  -0.5f,  0.0f,      1.0f,   0.0f,
-         -0.5f,   0.5f,  0.0f,      0.0f,   1.0f,
-
-         -0.5f,   0.5f,  0.0f,      0.0f,   1.0f,
-          0.5f,  -0.5f,  0.0f,      1.0f,   0.0f,
-          0.5f,   0.5f,  0.0f,      1.0f,   1.0f,
+          //coordonnées (xyz)        //droites normales          //coordonées uv (pour les textures)    
+         -0.5f,  -0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        0.0f,   0.0f,
+          0.5f,  -0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        1.0f,   0.0f,
+         -0.5f,   0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        0.0f,   1.0f,
+                                                   
+         -0.5f,   0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        0.0f,   1.0f,
+          0.5f,  -0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        1.0f,   0.0f,
+          0.5f,   0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        1.0f,   1.0f,
     };
 
     //création de l'objet qui stockera les infos de notre carré
@@ -144,12 +146,16 @@ unsigned int creerUnCarre()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     //dis ou trouver les coordonnées géométriques dans ce tableau
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //dis ou trouver les coordonnées uv dans ce tableau
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    //dis ou trouver les droites normales dans ce tableau
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    //dis ou trouver les coordonnées uv dans ce tableau
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     //sort du VAO
     glBindVertexArray(0);
@@ -187,7 +193,7 @@ unsigned int chargerUneTexture(const char* path)
     else
     {
         //message d'erreur
-        printf("probleme de chargement d'une texture : %s\n" , path);
+        printf("probleme de chargement d'une texture : %s (verifier peut etre la macro PROJECT_PATH)\n" , path);
         exit(EXIT_FAILURE);
     }
     //libere l'allocation dynamique qui stocke l'image
@@ -196,10 +202,6 @@ unsigned int chargerUneTexture(const char* path)
     //desactive toutes les textures
     glBindTexture(GL_TEXTURE_2D, 0);
     return texture;
-}
-
-Uniform make_Uniform(const char* name, unsigned int shader){
-    return (Uniform) {name, glGetUniformLocation(shader, name)};//recupere la position de la variable dans le shader
 }
 
 Boutton make_Boutton(int x, int y, int h, int l, unsigned int defaultTex, GLFWwindow* win) {
@@ -304,17 +306,22 @@ void afficherCarte(Carte* carte, unsigned int shader)
 
     glBindVertexArray(carre);
 
+    //affiche le recto de la carte 
     glCullFace(GL_BACK);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, carte->textureRecto);
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glCullFace(GL_FRONT);
+    //affiche le verso de la carte
+    modelIntermediaire = matriceDeRotation(make_vec4(0, 1, 0, 1), PI);
+    model = multiplicationDeMatrices(&model, &modelIntermediaire);
+
+    glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, &model.col0.x);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, carte->textureVerso);
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    glCullFace(GL_BACK);
 }

@@ -1,3 +1,10 @@
+/*****************************************************************//**
+ * \file   interface.h
+ * \brief  quelques fonctions pour creer un affichage avec opengl
+ * \author nicolas GUILLOT
+ * \date   May 2021
+ *********************************************************************/
+
 #ifndef INTERFACE
 #define INTERFACE
 #include <stdlib.h>
@@ -12,15 +19,10 @@
 #include <stdbool.h>
 
 #define PI 3.141592
+
+//IMPORTANT ! definit le chemin ou sont stockées les textures sur l'ordi
 #define PROJECT_PATH "../../../../OneDrive/Documents/GitHub/LoupGarou/"
 
-/**
- * @brief definit une variable shader de type uniform
- */
-typedef struct Uniform {
-	const char* name;		//nom de la variable dans le shader
-	unsigned int location;	//location de la variable dans le shader
-}Uniform;
 /**
  * @brief definit un boutton 2D, sa position et les différentes textures qu'il peut avoir
  */
@@ -77,12 +79,6 @@ unsigned int creerUnCarre();
  * @param un chemin vers une image
  */
 unsigned int chargerUneTexture(const char* path);
-/**
- * @brief permet de creer un uniform 
- * @param nom de la variable dans le shader
- * @param id du shader en question
- */
-Uniform make_Uniform(const char* name, unsigned int shader);
 /**
  * @brief sert de constructeur a la struct Boutton
  * @param position x	 (en pixel)

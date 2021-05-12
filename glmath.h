@@ -1,7 +1,7 @@
 /*****************************************************************//**
  * \file   glmath.h
  * \brief  quelques outils mathématiques pour la 3D et la 2D (les algo viennent d'internet et de glm)
- * \author nicolas
+ * \author nicolas GUILLOT
  * \date   May 2021
  *********************************************************************/
 

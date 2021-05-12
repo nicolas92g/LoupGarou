@@ -22,7 +22,8 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     
     
-    unsigned int shader = compilerLeShader(PROJECT_PATH"default.vert", PROJECT_PATH"default.frag");
+    unsigned int interfaceShader = compilerLeShader(PROJECT_PATH"interface.vert", PROJECT_PATH"interface.frag");
+    unsigned int phongShader = compilerLeShader(PROJECT_PATH"phong.vert", PROJECT_PATH"phong.frag");
     unsigned int VAO = creerUnCarre();
 
     unsigned int loupGarouTexture = chargerUneTexture(PROJECT_PATH"loupGarou.png");
@@ -45,11 +46,6 @@ int main() {
     Carte carteSorciere = make_Carte(sorciereTexture);
     Carte carteVoleur = make_Carte(voleurTexture);
 
-    Uniform projectionUniform = make_Uniform("projection", shader);
-    Uniform modelUniform = make_Uniform("model", shader);
-    Uniform vueUniform = make_Uniform("vue", shader);
-    Uniform timeUniform = make_Uniform("time", shader);
-
     Boutton lancer = make_Boutton(100, 100, 30, 100, chargerUneTexture(PROJECT_PATH"lancerUnePartieDefault.png"), fenetre);
     lancer.textureHover = chargerUneTexture(PROJECT_PATH"lancerUnePartieHover.png");
     lancer.alpha = 0.1;
@@ -68,79 +64,79 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
-        glUniform1f(timeUniform.location, glfwGetTime());
 
         //3D
+        glUseProgram(phongShader);
         glDepthFunc(GL_LEQUAL);
         projection = projectionPerspective(((float)width / (float)height), PI * 0.25f, 0.1f, 100.0f);
         vue = matriceDeVue(make_vec4(0, cos(glfwGetTime() * 0.2) * 15, -15, 1), make_vec4(0, 0, 0, 1), make_vec4(0, 1, 0, 1));
 
-        glUniformMatrix4fv(vueUniform.location, 1, GL_FALSE, &vue.col0.x);
-        glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.col0.x);
+        glUniformMatrix4fv(glGetUniformLocation(phongShader, "vue"), 1, GL_FALSE, &vue.col0.x);
+        glUniformMatrix4fv(glGetUniformLocation(phongShader, "projection"), 1, GL_FALSE, &projection.col0.x);
 
         carteLoupGarou.axeRotation = make_vec4(0, 1, 0, 1);
         carteLoupGarou.angle = glfwGetTime();
         carteLoupGarou.position = make_vec4(cos(glfwGetTime()* 0.2) * 6, 0, sin(glfwGetTime() * 0.2) * 6, 1);
         
-        afficherCarte(&carteLoupGarou, shader);
+        afficherCarte(&carteLoupGarou, phongShader);
 
         carteVillageois.axeRotation = make_vec4(0, 1, 0, 1);
         carteVillageois.angle = glfwGetTime() - PI * .25;
         carteVillageois.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .25) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .25) * 6, 1);
 
-        afficherCarte(&carteVillageois, shader);
+        afficherCarte(&carteVillageois, phongShader);
 
         cartevoyante.axeRotation = make_vec4(0, 1, 0, 1);
         cartevoyante.angle = glfwGetTime() - PI * .5;
         cartevoyante.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .5) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .5) * 6, 1);
 
-        afficherCarte(&cartevoyante, shader);
+        afficherCarte(&cartevoyante, phongShader);
 
         cartePetiteFille.axeRotation = make_vec4(0, 1, 0, 1);
         cartePetiteFille.angle = glfwGetTime() - PI * .75;
         cartePetiteFille.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * .75) * 6, 0, sin(glfwGetTime() * 0.2 + PI * .75) * 6, 1);
 
-        afficherCarte(&cartePetiteFille, shader);
+        afficherCarte(&cartePetiteFille, phongShader);
 
         carteCupidon.axeRotation = make_vec4(0, 1, 0, 1);
         carteCupidon.angle = glfwGetTime() - PI;
         carteCupidon.position = make_vec4(cos(glfwGetTime() * 0.2 + PI ) * 6, 0, sin(glfwGetTime() * 0.2 + PI) * 6, 1);
 
-        afficherCarte(&carteCupidon, shader);
+        afficherCarte(&carteCupidon, phongShader);
 
         carteChasseur.axeRotation = make_vec4(0, 1, 0, 1);
         carteChasseur.angle = glfwGetTime() - PI * 1.25;
         carteChasseur.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.25) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.25) * 6, 1);
 
-        afficherCarte(&carteChasseur, shader);
+        afficherCarte(&carteChasseur, phongShader);
 
         carteSorciere.axeRotation = make_vec4(0, 1, 0, 1);
         carteSorciere.angle = glfwGetTime() - PI * 1.5;
         carteSorciere.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.5) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.5) * 6, 1);
 
-        afficherCarte(&carteSorciere, shader);
+        afficherCarte(&carteSorciere, phongShader);
 
         carteVoleur.axeRotation = make_vec4(0, 1, 0, 1);
         carteVoleur.angle = glfwGetTime() - PI * 1.75;
         carteVoleur.position = make_vec4(cos(glfwGetTime() * 0.2 + PI * 1.75) * 6, 0, sin(glfwGetTime() * 0.2 + PI * 1.75) * 6, 1);
 
-        afficherCarte(&carteVoleur, shader);
+        afficherCarte(&carteVoleur, phongShader);
 
 
         //2D
         glDepthFunc(GL_ALWAYS);
+        glUseProgram(interfaceShader);
         projection = ProjectionOrthographique(0, width, 0, height, -10.0f, 10.0f);
         vue = matriceDidentite(1);
         
-        glUniformMatrix4fv(vueUniform.location, 1, GL_FALSE, &vue.col0.x);
-        glUniformMatrix4fv(projectionUniform.location, 1, GL_FALSE, &projection.col0.x);
+        glUniformMatrix4fv(glGetUniformLocation(interfaceShader, "projection"), 1, GL_FALSE, &projection.col0.x);
 
         
         lancer.l = width * .35f;
         lancer.h = width * .1f;
         lancer.x = width * .5f;
         lancer.y = height * .15f;
-        afficherBoutton(&lancer, shader);
+        afficherBoutton(&lancer, interfaceShader);
 
         glfwSwapBuffers(fenetre);
         glfwPollEvents();

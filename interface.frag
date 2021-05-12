@@ -7,7 +7,6 @@ out vec4 color;
 
 
 uniform sampler2D tex;//on recupere une texture
-uniform float time;//on recupere le temps d'execution du programme
 uniform float alpha;//filtre alpha
 uniform vec3 filtre = vec3(1);//filtre de couleur
 
