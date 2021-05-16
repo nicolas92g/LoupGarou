@@ -24,7 +24,7 @@ vec4 make_vec4(float x, float y, float z, float w) {
 
 vec4 multiplie(vec4 vec, float f)
 {
-    return (vec4) { vec.x* f, vec.y* f, vec.z* f, vec.w* f };
+    return (vec4) { vec.x * f, vec.y * f, vec.z * f, vec.w * f };
 }
 
 vec4 additionne(vec4 v1, vec4 v2)

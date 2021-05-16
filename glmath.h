@@ -1,6 +1,6 @@
 /*****************************************************************//**
  * \file   glmath.h
- * \brief  quelques outils mathématiques pour la 3D et la 2D (les algo viennent d'internet et de glm)
+ * \brief  quelques outils mathématiques pour la 3D et la 2D (les formules viennent d'internet et de glm)
  * \author nicolas GUILLOT
  * \date   May 2021
  *********************************************************************/
@@ -10,10 +10,12 @@
 
 #include <math.h>
 
+#define PI 3.141592
+
 /**
- * @brief definit un vecteur ou tableau de 4 float
+ * @brief definit un vecteur ou tableau de 4 floats
  */
-typedef struct vec4 {
+typedef struct vecteur4 {
 	float x;
 	float y;
 	float z;
@@ -21,14 +23,14 @@ typedef struct vec4 {
 } vec4;
 
 /**
- * @brief definit une matrice 4 x 4
+ * @brief definit une matrice 4 x 4 de floats 
  */
-typedef struct mat4x4 {
+typedef struct matrice4x4 {
 	vec4 col0;
 	vec4 col1;
 	vec4 col2;
 	vec4 col3;
-}mat4x4;
+} mat4x4;
 /**
  * @brief renvoit le carre d'un nombre
  */

@@ -8,7 +8,7 @@ in vec3 pixelPos;
 out vec4 color;
 
 //variables locales
-const vec3 positionLumiere = vec3(-1, 2, 0.5);
+const vec3 positionLumiere = vec3(10, 2, -5);
 const vec3 couleurLumiere = vec3(1, 0.9, 0.8);
 
 uniform sampler2D tex;//on recupere une texture

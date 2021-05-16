@@ -14,6 +14,11 @@ void creerLaFenetre(GLFWwindow** window) {
     glfwWindowHint(GLFW_SAMPLES, 32);//active le multisampling avec 32 samples par pixels
 
     *window = glfwCreateWindow(800, 600, "Jeu de Loup Garou", NULL, NULL);//on creer la fenetre
+    
+    //mettre une icone a la fenetre
+    GLFWimage icon;
+    icon.pixels = stbi_load(PROJECT_PATH"loupGarou.png", &icon.width, &icon.height, NULL, 4);
+    glfwSetWindowIcon(*window, 1, &icon);
 
     //on teste si la fentre a été créée correctement
     if (*window == NULL)
@@ -32,7 +37,7 @@ void creerLaFenetre(GLFWwindow** window) {
         exit(EXIT_FAILURE);
     }
 
-    //on met le viewport a la taille actuelle de la fenetre
+    //on met le viewport par default a la taille actuelle de la fenetre
     glViewport(0, 0, 800, 600);
 
     glfwSetInputMode(*window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_FALSE);
@@ -74,12 +79,12 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
  
     int succes;
     char InfoCompilation[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &succes);//recupere les infos de compilation 
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &succes);//recupere les infos de compilation
 
     if (!succes)//verifie que la compilation est un succes
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, InfoCompilation);
-        printf("la compilation du vertex shader a rate :\n%s\n", InfoCompilation);
+        printf("%s\n", InfoCompilation);
     }
 
     //creer le fragment shader
@@ -95,7 +100,7 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
     if (!succes)//verifie que la compilation est un succes
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, InfoCompilation);
-        printf("la compilation du fragment shader a rate :\n%s\n", InfoCompilation);
+        printf("%s\n", InfoCompilation);
     }
 
     unsigned int shaderProgram;
@@ -108,7 +113,7 @@ unsigned int compilerLeShader(const char* vertexPath, const char* fragmentPath)
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &succes);//verifie le succes de cette etape
     if (!succes) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, InfoCompilation);
-        printf("la creation du shader a rate : \n%s\n", InfoCompilation);
+        printf("%s\n", InfoCompilation);
         exit(EXIT_FAILURE);
     }
 
@@ -133,7 +138,7 @@ unsigned int creerUnCarre()
           0.5f,  -0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        1.0f,   0.0f,
           0.5f,   0.5f,  0.0f,       0.0f,   0.0f, -1.0f,        1.0f,   1.0f,
     };
-
+    
     //création de l'objet qui stockera les infos de notre carré
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
@@ -205,7 +210,7 @@ unsigned int chargerUneTexture(const char* path)
 }
 
 Boutton make_Boutton(int x, int y, int h, int l, unsigned int defaultTex, GLFWwindow* win) {
-    return (Boutton) {x, y, h, l, defaultTex, defaultTex, defaultTex, .0f, make_vec4(1,1,1,1), win, false, false};
+    return (Boutton) {x, y, h, l, defaultTex, defaultTex, defaultTex, .0f, make_vec4(1,1,1,1), win, false, false, false, false};
 }
 
 void setBouttonTextures(Boutton* boutton, unsigned int whenHover, unsigned int whenClicked)
@@ -248,7 +253,10 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
         y < (boutton->y + boutton->h * .5);
 
     //indique si le boutton est cliquer
+    bool ancienneValeur = boutton->clicker;
     boutton->clicker = (boutton->hover && glfwGetMouseButton(boutton->win, GLFW_MOUSE_BUTTON_LEFT));
+
+    boutton->viensDetreClicker = (!ancienneValeur && boutton->clicker);
     
     //choisit la bonne texture
     glActiveTexture(GL_TEXTURE0);
@@ -267,15 +275,20 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
 
     //assigne les filtres dans le shader
     glUniform1f(glGetUniformLocation(shader, "alpha"), boutton->alpha);
-    glUniform3fv(glGetUniformLocation(shader, "filtre"), 1, &boutton->filter);
+    
 
+    if (boutton->filtreHover && boutton->hover) {
+        glUniform3f(glGetUniformLocation(shader, "filtre"), 
+            boutton->filter.x - .2, boutton->filter.y - .2, boutton->filter.z - .2);
+
+    }
+    else {
+        glUniform3fv(glGetUniformLocation(shader, "filtre"), 1, &boutton->filter);
+    }
+    
     glBindVertexArray(carre);
     //affiche le boutton
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    //remetre les filtres par defaults
-    glUniform1f(glGetUniformLocation(shader, "alpha"), 0.0f);
-    glUniform3f(glGetUniformLocation(shader, "filtre"), 1, 1, 1);
 }
 
 Carte make_Carte(unsigned int texture){
@@ -306,7 +319,7 @@ void afficherCarte(Carte* carte, unsigned int shader)
 
     glBindVertexArray(carre);
 
-    //affiche le recto de la carte 
+    //affiche le recto de la carte
     glCullFace(GL_BACK);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, carte->textureRecto);
@@ -324,4 +337,378 @@ void afficherCarte(Carte* carte, unsigned int shader)
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+}
+
+Decoration make_Decoration(GLFWwindow* fenetre)
+{
+    Decoration deco;
+
+    deco.shader = compilerLeShader(PROJECT_PATH"phong.vert", PROJECT_PATH"phong.frag");
+    deco.cam = make_Camera(fenetre);
+    deco.cam.regard = make_vec4(0, 0, 0, 1);
+
+    deco.loupGarouTexture = chargerUneTexture(PROJECT_PATH"loupGarou.png");
+    deco.villageoisTexture = chargerUneTexture(PROJECT_PATH"villageois.png");
+    deco.voyanteTexture = chargerUneTexture(PROJECT_PATH"voyante.png");
+    deco.voleurTexture = chargerUneTexture(PROJECT_PATH"voleur.png");
+    deco.versoTexture = chargerUneTexture(PROJECT_PATH"verso.png");
+    deco.petiteFilleTexture = chargerUneTexture(PROJECT_PATH"petiteFille.png");
+    deco.cupidonTexture = chargerUneTexture(PROJECT_PATH"cupidon.png");
+    deco.chasseurTexture = chargerUneTexture(PROJECT_PATH"chasseur.png");
+    deco.sorciereTexture = chargerUneTexture(PROJECT_PATH"sorciere.png");
+    deco.capitaineTexture = chargerUneTexture(PROJECT_PATH"capitaine.png");
+
+    deco.carteLoupGarou = make_Carte(deco.loupGarouTexture);
+    deco.carteVillageois = make_Carte(deco.villageoisTexture);
+    deco.cartevoyante = make_Carte(deco.voyanteTexture);
+    deco.cartePetiteFille = make_Carte(deco.petiteFilleTexture);
+    deco.carteCupidon = make_Carte(deco.cupidonTexture);
+    deco.carteChasseur = make_Carte(deco.chasseurTexture);
+    deco.carteSorciere = make_Carte(deco.sorciereTexture);
+    deco.carteVoleur = make_Carte(deco.voleurTexture);
+
+    return deco;
+}
+
+void rotationsEnCercle(Decoration* deco) {
+
+    deco->cam.position = make_vec4( 1,cos(glfwGetTime() * .2) * 12, 16, 1);
+    updateCamera3D(&deco->cam, deco->shader);
+
+    Carte* crt = &deco->carteLoupGarou;
+    for (short i = 0; i < 8; i++)
+    {
+        (crt + i)->axeRotation = make_vec4(0, 1, 0, 1);
+        (crt + i)->angle = glfwGetTime() + PI * 0.25 * i;
+        (crt + i)->position = make_vec4(
+            cos(glfwGetTime() * 0.2 + PI * 0.25 * i) * 6, 
+            0, 
+            sin(glfwGetTime() * 0.2 + PI * 0.25 * i) * 6,
+            1);
+
+        afficherCarte(crt + i, deco->shader);
+    }
+}
+
+void carteQuiSeDevoile(Decoration* deco, Role role) {
+    static double startTime = .0;
+    static Role ancienRole = -1;
+
+    if (ancienRole != role) {
+        startTime = glfwGetTime();
+        ancienRole = role;
+    }
+    if (role < 1) {
+        startTime = glfwGetTime();
+        role = ROLE_LOUP_GAROU;
+    }
+
+    const double time = (glfwGetTime() - startTime) * 2.0;
+
+    deco->cam.position = make_vec4(0, 2, 16, 1);
+    updateCamera3D(&deco->cam, deco->shader);
+
+    (&deco->carteLoupGarou + role)->axeRotation = make_vec4(0, 1, 0, 1);
+    (&deco->carteLoupGarou + role)->angle = cos(min(time * .5, PI)) * PI * .5 + PI * .5;
+    (&deco->carteLoupGarou + role)->position = make_vec4(0, 0, min(-5 + time, 5), 1);
+
+    afficherCarte(&deco->carteLoupGarou + role, deco->shader);
+}
+
+Camera make_Camera(GLFWwindow* fenetre)
+{
+    return (Camera) {make_vec4(0,0,-2,1), make_vec4(0,0,0,1), fenetre, matriceDidentite(1), matriceDidentite(1)};
+}
+
+void updateCamera3D(Camera* cam, unsigned int shader)
+{
+    int width, height;
+    glfwGetWindowSize(cam->win, &width, &height);
+
+    glDepthFunc(GL_LEQUAL);
+
+    cam->projection = projectionPerspective(((float)width / (float)height), PI * 0.25f, 0.1f, 100.0f);
+    cam->vue = matriceDeVue(cam->position, cam->regard, make_vec4(0, 1, 0, 1));
+
+    glUseProgram(shader);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "vue"), 1, GL_FALSE, &cam->vue.col0.x);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, &cam->projection.col0.x);
+}
+
+void updateCamera2D(Camera* cam, unsigned int shader)
+{
+    int width, height;
+    glfwGetWindowSize(cam->win, &width, &height);
+
+    glDepthFunc(GL_ALWAYS);
+
+    cam->projection = ProjectionOrthographique(0, width, 0, height, -10.0f, 10.0f);
+
+    glUseProgram(shader);
+    glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, &cam->projection.col0.x);
+}
+
+GUI make_GUI(GLFWwindow* fenetre) {
+    //couleur d'arriere plan
+    glClearColor(.7f, .7f, .7f, 1.0f);
+
+    //active la transparence
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    //active le test de profondeur
+    glEnable(GL_DEPTH_TEST);
+
+    GUI ret;
+    ret.lancerLaPartie = make_Boutton(100, 100, 30, 100, chargerUneTexture(PROJECT_PATH"lancerUnePartieDefault.png"), fenetre);
+    ret.lancerLaPartie.textureHover = chargerUneTexture(PROJECT_PATH"lancerUnePartieHover.png");
+    ret.lancerLaPartie.alpha = 0.1;
+
+    ret.fenetre = fenetre;
+    ret.etat = ETAT_ECRAN_DE_DEPART;
+
+    ret.carre = creerUnCarre();
+    ret.shader = compilerLeShader(PROJECT_PATH"interface.vert", PROJECT_PATH"interface.frag");
+    ret.cam = make_Camera(fenetre);
+    ret.deco = make_Decoration(fenetre);
+
+    ret.combienDeJoueurQuestion = chargerUneTexture(PROJECT_PATH"combienDeJoueurQuestion.png");
+    ret.afficherCarteTexture = chargerUneTexture(PROJECT_PATH"carteDuJoueur.png");
+    ret.cacherCarteTexture = chargerUneTexture(PROJECT_PATH"cacherCarte.png");
+    
+    ret.nombresTextures[0] = chargerUneTexture(PROJECT_PATH"un.png");
+    ret.nombresTextures[1] = chargerUneTexture(PROJECT_PATH"deux.png");
+    ret.nombresTextures[2] = chargerUneTexture(PROJECT_PATH"trois.png");
+    ret.nombresTextures[3] = chargerUneTexture(PROJECT_PATH"quatre.png");
+    ret.nombresTextures[4] = chargerUneTexture(PROJECT_PATH"cinq.png");
+    ret.nombresTextures[5] = chargerUneTexture(PROJECT_PATH"six.png");
+    ret.nombresTextures[6] = chargerUneTexture(PROJECT_PATH"sept.png");
+    ret.nombresTextures[7] = chargerUneTexture(PROJECT_PATH"huit.png");
+    ret.nombresTextures[8] = chargerUneTexture(PROJECT_PATH"neuf.png");
+    ret.nombresTextures[9] = chargerUneTexture(PROJECT_PATH"dix.png");
+    ret.nombresTextures[10] = chargerUneTexture(PROJECT_PATH"onze.png");
+    ret.nombresTextures[11] = chargerUneTexture(PROJECT_PATH"douze.png");
+    ret.nombresTextures[12] = chargerUneTexture(PROJECT_PATH"treize.png");
+    ret.nombresTextures[13] = chargerUneTexture(PROJECT_PATH"quatorze.png");
+    ret.nombresTextures[14] = chargerUneTexture(PROJECT_PATH"quinze.png");
+    ret.nombresTextures[15] = chargerUneTexture(PROJECT_PATH"seize.png");
+    ret.nombresTextures[16] = chargerUneTexture(PROJECT_PATH"dixSept.png");
+    ret.nombresTextures[17] = chargerUneTexture(PROJECT_PATH"dixHuit.png");
+
+    unsigned int blancTexture = chargerUneTexture(PROJECT_PATH"blanc.png");
+
+    for (size_t i = 0; i < 11; i++)
+    {
+        ret.bouttons[i] = make_Boutton(0, 0, 10, 10, blancTexture, fenetre);
+        (ret.bouttons + i)->alpha = .2f;
+        (ret.bouttons + i)->filtreHover = true;
+    }
+
+    ret.roleAMontrer = 0;
+    ret.nombreDeJoueur = 0;
+
+    return ret;
+}
+
+void afficherGUI(GUI* input) {
+    int width, height;
+    glfwGetWindowSize(input->fenetre, &width, &height);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, width, height);
+
+    mat4x4 model;
+    mat4x4 translation;
+    mat4x4 taille;
+    
+    switch (input->etat)
+    {
+    case ETAT_ECRAN_DE_DEPART:
+        //affiche l'arriere plan
+        rotationsEnCercle(&input->deco);
+        
+        //met a jour la camera pour la 2D
+        updateCamera2D(&input->cam, input->shader);
+
+        //affiche un bouton lancer la partie en modifiant sa position et sa taille par rapport a la fenetre
+        input->lancerLaPartie.l = width * .35f;
+        input->lancerLaPartie.h = width * .1f;
+        input->lancerLaPartie.x = width * .5f;
+        input->lancerLaPartie.y = height * .15f;
+        afficherBoutton(&input->lancerLaPartie, input->shader);
+        
+        //test si le boutton est clicker
+        if (input->lancerLaPartie.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+            input->etat = ETAT_COMBIEN_DE_JOUEUR;
+            input->nombreDimageDansUnEtat = 0;
+        }
+        break;
+
+    case ETAT_COMBIEN_DE_JOUEUR:
+        //fonctions pour afficher l'arriere plan
+        rotationsEnCercle(&input->deco);
+
+        //met a jour la camera pour la 2D
+        updateCamera2D(&input->cam, input->shader);
+
+        //prepare la matrice
+        translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
+        taille = matriceDeTaille(width * .6f, height * .09f, 1);
+        model = multiplicationDeMatrices(&translation, &taille);
+
+        //envoie la matrice au shader et le filtre alpha
+        glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+        glUniform1f(glGetUniformLocation(input->shader, "alpha"), .1f);
+        glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+        //affiche la question
+        glUseProgram(input->shader);
+        glBindVertexArray(input->carre);
+        glBindTexture(GL_TEXTURE_2D, input->combienDeJoueurQuestion);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //sert de compteur de lignes pour l'entree du nombre de joueur
+        static int lignes;
+        lignes = 0;
+
+        //affichage des bouttons pour choisir le nbr de joueurs
+        for (size_t i = 0; i < 11; i++)
+        {
+            //si i est un multiple de 3 non nul alors sauter une ligne
+            if (!(i % 3) && i) lignes++;
+            
+            //position et taille de chaque bouttons;
+            (input->bouttons + i)->x = i % 3 * height * .21f + (width * .5f - height * .21f);
+            (input->bouttons + i)->y = height * .78f - lignes * height * .21f;
+            (input->bouttons + i)->l = height * .2f;
+            (input->bouttons + i)->h = height * .2f;
+
+            //affichage du boutton
+            afficherBoutton(&input->bouttons[i], input->shader);
+
+            //affichage du nombre sur le boutton
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[i + 7]);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //si un boutton est clicker et que la page s'est afficher suffisament longtemps
+            if ((input->bouttons + i)->viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+                input->nombreDeJoueur = 8 + i;
+                input->etat = ETAT_ASSIGNATION_DES_ROLES;
+                input->nombreDimageDansUnEtat = 0;
+
+                //verifie que le nombre de joueur est correct
+                printf("%d",input->nombreDeJoueur);
+                assert(input->nombreDeJoueur >= 8 && input->nombreDeJoueur <= 18);
+
+                if (!input->roles) printf("allocation rate !\n");
+                
+                //repartition des roles
+                for (size_t i = 0; i < input->nombreDeJoueur; i++)
+                {
+                    input->roles[i] = (Role)(rand() % 8);
+                }
+            }
+        }
+        break;
+    case ETAT_ASSIGNATION_DES_ROLES :
+        //met a jour la camera pour la 2D
+        updateCamera2D(&input->cam, input->shader);
+
+        //permet de stocker l'ancienne valeur de GLFW_MOUSE_BUTTON_LEFT
+        static bool cliquer = false, montrer = false;
+
+        //actions en cas de clique
+        if (cliquer && !glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT) && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 2.0 * (montrer + .1) ) {
+            if(montrer){
+                input->roleAMontrer++;
+            }
+            input->nombreDimageDansUnEtat = 0;
+            montrer = !montrer;
+        }
+        cliquer = glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT);
+
+        //si tous les roles on été affiché
+        if (input->roleAMontrer >= input->nombreDeJoueur) {
+            input->etat = ETAT_ECRAN_DE_DEPART;
+            montrer = false;
+            input->roleAMontrer = 0;
+        }
+
+        
+        //si on dois montrer la carte
+        if (montrer) {
+            if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 2.2) {
+                //prepare la matrice
+                translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
+                taille = matriceDeTaille(height * .9f, height * .09f, 1);
+                model = multiplicationDeMatrices(&translation, &taille);
+
+                //envoie la matrice au shader et le filtre alpha
+                glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+                glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 +.1);
+                glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+                //affiche la question
+                glUseProgram(input->shader);
+                glBindVertexArray(input->carre);
+                glBindTexture(GL_TEXTURE_2D, input->cacherCarteTexture);
+
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+            }
+
+            //animation d'une carte qui se devoile pour donner le role a chaque joueur
+            carteQuiSeDevoile(&input->deco, input->roles[input->roleAMontrer]);
+
+            
+        }
+        //si la carte est encore cachée
+        else {
+            //affiche l'instruction : clicquer pour afficher la carte du joueur 
+            //prepare la matrice
+            translation = matriceDeTranslation(width * .45f, height * 0.95f, 0);
+            taille = matriceDeTaille(height, height * .09f, 1);
+            model = multiplicationDeMatrices(&translation, &taille);
+
+            //affichage
+            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+            glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 + .1);
+            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+            glUseProgram(input->shader);
+            glBindVertexArray(input->carre);
+            glBindTexture(GL_TEXTURE_2D, input->afficherCarteTexture);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //affiche le numero du joueur
+            translation = matriceDeTranslation(width * .47f + height * .5, height * 0.95f, 0);
+            taille = matriceDeTaille(height * .08f, height * .08f, 1);
+            model = multiplicationDeMatrices(&translation, &taille);
+
+            //affichqge
+            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+            glUseProgram(input->shader);
+            glBindVertexArray(input->carre);
+            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[input->roleAMontrer]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //montre juste une carte cachée
+            carteQuiSeDevoile(&input->deco, -1);
+        }
+
+        break;
+    default:
+        break;
+    }
+
+    input->nombreDimageDansUnEtat++;
+    //finir l'image
+    glfwSwapBuffers(input->fenetre);
+    glfwPollEvents();
+}
+
+void detruire_GUI(GUI* input)
+{
+    glDeleteVertexArrays(1, &input->carre);
 }
