@@ -553,7 +553,7 @@ void afficherGUI(GUI* input) {
 
         //prepare la matrice
         translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
-        taille = matriceDeTaille(width * .6f, height * .09f, 1);
+        taille = matriceDeTaille(height * 1.0f, height * .09f, 1);
         model = multiplicationDeMatrices(&translation, &taille);
 
         //envoie la matrice au shader et le filtre alpha
