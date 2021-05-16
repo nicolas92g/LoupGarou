@@ -294,7 +294,7 @@ void afficherBoutton(Boutton* boutton, unsigned int shader)
 Carte make_Carte(unsigned int texture){
     //charger une texture de verso pour toutes les cartes
     static unsigned int verso = 0;
-    if (!verso) verso = chargerUneTexture(PROJECT_PATH"verso.png");
+    if (!verso) verso = chargerUneTexture(PROJECT_PATH"textures/verso.png");
     //creer la carte
     return (Carte){make_vec4(0,0,0,1), make_vec4(0, 0, 1, 1), .0f, texture, verso};
 }
@@ -347,16 +347,16 @@ Decoration make_Decoration(GLFWwindow* fenetre)
     deco.cam = make_Camera(fenetre);
     deco.cam.regard = make_vec4(0, 0, 0, 1);
 
-    deco.loupGarouTexture = chargerUneTexture(PROJECT_PATH"loupGarou.png");
-    deco.villageoisTexture = chargerUneTexture(PROJECT_PATH"villageois.png");
-    deco.voyanteTexture = chargerUneTexture(PROJECT_PATH"voyante.png");
-    deco.voleurTexture = chargerUneTexture(PROJECT_PATH"voleur.png");
-    deco.versoTexture = chargerUneTexture(PROJECT_PATH"verso.png");
-    deco.petiteFilleTexture = chargerUneTexture(PROJECT_PATH"petiteFille.png");
-    deco.cupidonTexture = chargerUneTexture(PROJECT_PATH"cupidon.png");
-    deco.chasseurTexture = chargerUneTexture(PROJECT_PATH"chasseur.png");
-    deco.sorciereTexture = chargerUneTexture(PROJECT_PATH"sorciere.png");
-    deco.capitaineTexture = chargerUneTexture(PROJECT_PATH"capitaine.png");
+    deco.loupGarouTexture = chargerUneTexture(PROJECT_PATH"textures/loupGarou.png");
+    deco.villageoisTexture = chargerUneTexture(PROJECT_PATH"textures/villageois.png");
+    deco.voyanteTexture = chargerUneTexture(PROJECT_PATH"textures/voyante.png");
+    deco.voleurTexture = chargerUneTexture(PROJECT_PATH"textures/voleur.png");
+    deco.versoTexture = chargerUneTexture(PROJECT_PATH"textures/verso.png");
+    deco.petiteFilleTexture = chargerUneTexture(PROJECT_PATH"textures/petiteFille.png");
+    deco.cupidonTexture = chargerUneTexture(PROJECT_PATH"textures/cupidon.png");
+    deco.chasseurTexture = chargerUneTexture(PROJECT_PATH"textures/chasseur.png");
+    deco.sorciereTexture = chargerUneTexture(PROJECT_PATH"textures/sorciere.png");
+    deco.capitaineTexture = chargerUneTexture(PROJECT_PATH"textures/capitaine.png");
 
     deco.carteLoupGarou = make_Carte(deco.loupGarouTexture);
     deco.carteVillageois = make_Carte(deco.villageoisTexture);
@@ -460,8 +460,8 @@ GUI make_GUI(GLFWwindow* fenetre) {
     glEnable(GL_DEPTH_TEST);
 
     GUI ret;
-    ret.lancerLaPartie = make_Boutton(100, 100, 30, 100, chargerUneTexture(PROJECT_PATH"lancerUnePartieDefault.png"), fenetre);
-    ret.lancerLaPartie.textureHover = chargerUneTexture(PROJECT_PATH"lancerUnePartieHover.png");
+    ret.lancerLaPartie = make_Boutton(100, 100, 30, 100, chargerUneTexture(PROJECT_PATH"textures/lancerUnePartieDefault.png"), fenetre);
+    ret.lancerLaPartie.textureHover = chargerUneTexture(PROJECT_PATH"textures/lancerUnePartieHover.png");
     ret.lancerLaPartie.alpha = 0.1;
 
     ret.fenetre = fenetre;
@@ -472,30 +472,30 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.cam = make_Camera(fenetre);
     ret.deco = make_Decoration(fenetre);
 
-    ret.combienDeJoueurQuestion = chargerUneTexture(PROJECT_PATH"combienDeJoueurQuestion.png");
-    ret.afficherCarteTexture = chargerUneTexture(PROJECT_PATH"carteDuJoueur.png");
-    ret.cacherCarteTexture = chargerUneTexture(PROJECT_PATH"cacherCarte.png");
-    
-    ret.nombresTextures[0] = chargerUneTexture(PROJECT_PATH"un.png");
-    ret.nombresTextures[1] = chargerUneTexture(PROJECT_PATH"deux.png");
-    ret.nombresTextures[2] = chargerUneTexture(PROJECT_PATH"trois.png");
-    ret.nombresTextures[3] = chargerUneTexture(PROJECT_PATH"quatre.png");
-    ret.nombresTextures[4] = chargerUneTexture(PROJECT_PATH"cinq.png");
-    ret.nombresTextures[5] = chargerUneTexture(PROJECT_PATH"six.png");
-    ret.nombresTextures[6] = chargerUneTexture(PROJECT_PATH"sept.png");
-    ret.nombresTextures[7] = chargerUneTexture(PROJECT_PATH"huit.png");
-    ret.nombresTextures[8] = chargerUneTexture(PROJECT_PATH"neuf.png");
-    ret.nombresTextures[9] = chargerUneTexture(PROJECT_PATH"dix.png");
-    ret.nombresTextures[10] = chargerUneTexture(PROJECT_PATH"onze.png");
-    ret.nombresTextures[11] = chargerUneTexture(PROJECT_PATH"douze.png");
-    ret.nombresTextures[12] = chargerUneTexture(PROJECT_PATH"treize.png");
-    ret.nombresTextures[13] = chargerUneTexture(PROJECT_PATH"quatorze.png");
-    ret.nombresTextures[14] = chargerUneTexture(PROJECT_PATH"quinze.png");
-    ret.nombresTextures[15] = chargerUneTexture(PROJECT_PATH"seize.png");
-    ret.nombresTextures[16] = chargerUneTexture(PROJECT_PATH"dixSept.png");
-    ret.nombresTextures[17] = chargerUneTexture(PROJECT_PATH"dixHuit.png");
+    ret.combienDeJoueurQuestion = chargerUneTexture(PROJECT_PATH"textures/combienDeJoueurQuestion.png");
+    ret.afficherCarteTexture = chargerUneTexture(PROJECT_PATH"textures/carteDuJoueur.png");
+    ret.cacherCarteTexture = chargerUneTexture(PROJECT_PATH"textures/cacherCarte.png");
 
-    unsigned int blancTexture = chargerUneTexture(PROJECT_PATH"blanc.png");
+    ret.nombresTextures[0] = chargerUneTexture(PROJECT_PATH"textures/un.png");
+    ret.nombresTextures[1] = chargerUneTexture(PROJECT_PATH"textures/deux.png");
+    ret.nombresTextures[2] = chargerUneTexture(PROJECT_PATH"textures/trois.png");
+    ret.nombresTextures[3] = chargerUneTexture(PROJECT_PATH"textures/quatre.png");
+    ret.nombresTextures[4] = chargerUneTexture(PROJECT_PATH"textures/cinq.png");
+    ret.nombresTextures[5] = chargerUneTexture(PROJECT_PATH"textures/six.png");
+    ret.nombresTextures[6] = chargerUneTexture(PROJECT_PATH"textures/sept.png");
+    ret.nombresTextures[7] = chargerUneTexture(PROJECT_PATH"textures/huit.png");
+    ret.nombresTextures[8] = chargerUneTexture(PROJECT_PATH"textures/neuf.png");
+    ret.nombresTextures[9] = chargerUneTexture(PROJECT_PATH"textures/dix.png");
+    ret.nombresTextures[10] = chargerUneTexture(PROJECT_PATH"textures/onze.png");
+    ret.nombresTextures[11] = chargerUneTexture(PROJECT_PATH"textures/douze.png");
+    ret.nombresTextures[12] = chargerUneTexture(PROJECT_PATH"textures/treize.png");
+    ret.nombresTextures[13] = chargerUneTexture(PROJECT_PATH"textures/quatorze.png");
+    ret.nombresTextures[14] = chargerUneTexture(PROJECT_PATH"textures/quinze.png");
+    ret.nombresTextures[15] = chargerUneTexture(PROJECT_PATH"textures/seize.png");
+    ret.nombresTextures[16] = chargerUneTexture(PROJECT_PATH"textures/dixSept.png");
+    ret.nombresTextures[17] = chargerUneTexture(PROJECT_PATH"textures/dixHuit.png");
+
+    unsigned int blancTexture = chargerUneTexture(PROJECT_PATH"textures/blanc.png");
 
     for (size_t i = 0; i < 11; i++)
     {
