@@ -5,16 +5,22 @@ int main() {
     GLFWwindow* fenetre;
     creerLaFenetre(&fenetre);
     
-    GUI affichage = make_GUI(fenetre);
+    GUI input = make_GUI(fenetre);
 
-    do
+    recupererLeNombreDeJoueurs(&input);
+
+    Role roles[18];
+
+    for (size_t i = 0; i < input.nombreDeJoueur; i++)
     {
-        afficherGUI(&affichage);
+        roles[i] = rand() % 7;
     }
-    while (!glfwWindowShouldClose(fenetre));
 
-    detruire_GUI(&affichage);
+    montrerLeRoleDeChaqueJoueurs(&input, roles);
 
+    //finir le programme
+    detruire_GUI(&input);
+    glfwDestroyWindow(fenetre);
     glfwTerminate();
     return 0;
 }

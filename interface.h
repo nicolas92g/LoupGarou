@@ -137,13 +137,11 @@ typedef struct GUI {
 	unsigned int cacherCarteTexture;		//stocke une texture
 
 	//assignation des roles
-	Role roles[18];
 	unsigned short roleAMontrer;
 
 	enum Etat {
 		ETAT_ECRAN_DE_DEPART,
-		ETAT_COMBIEN_DE_JOUEUR,
-		ETAT_ASSIGNATION_DES_ROLES
+		ETAT_COMBIEN_DE_JOUEUR
 	} etat;									//permet de stocker quelle page est a afficher
 } GUI;
 
@@ -236,12 +234,20 @@ void updateCamera2D(Camera* cam, unsigned int shader);
  */
 GUI make_GUI(GLFWwindow* fenetre);
 /**
- * @brief affiche l'interface utilisateur
+ * @brief fonction affichant l'interface de depart pour demander le nombre de joueurs
  */
-void afficherGUI(GUI* inte);
+void recupererLeNombreDeJoueurs(GUI* input);
+/**
+ * @brief permet a chaque joueur de savoir son role
+ */
+void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles);
 /**
  * @brief detruit l'objet GUI
  */
 void detruire_GUI(GUI* input);
+/**
+ * @brief interface permettant de selectionner un joueur parmis une selectionée
+ */
+unsigned short choisirUnJoueur(unsigned short* listeDeJoueursEnVie, unsigned short nombreDeJoueursEnVie );
 
 #endif // !INTERFACE
