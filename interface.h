@@ -16,6 +16,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "glmath.h"
 #include <stdbool.h>
 
@@ -79,6 +82,28 @@ typedef struct Carte {
 
 } Carte;
 /**
+ * @brief permet de stocker l'ensemble des éléments qu'il faut pour afficher un charactere
+ */
+typedef struct Charactere {
+	unsigned int largeur;
+	unsigned int hauteur;
+	unsigned int decalageX;
+	unsigned int decalageY;
+	unsigned int avance;
+	unsigned int texture;
+} Charactere;
+/**
+ * @brief permet d'afficher des chaines de characteres a l'ecran
+ */
+typedef struct AfficheurDeTexte {
+	Charactere tableauDeCharacteres[128];
+	unsigned int VAO;
+	unsigned int VBO;
+
+	GLFWwindow* fenetre;
+	unsigned int shader;
+} AfficheurDeTexte;
+/**
  *@brief structure qui stockent toutes les decorations en rapport avec le loup Garou
  */
 typedef struct Decoration {
@@ -118,6 +143,7 @@ typedef struct GUI {
 	Decoration deco;						//arriere plan en 3D
 	Camera cam;								//objet pour generer des matrices 3D ou 2D
 	Decoration cartes;						//cartes en 3D
+	AfficheurDeTexte texte;					//objet permettant d'afficher du texte
 
 	unsigned int carre;						//VAO pour afficher des images
 	unsigned long long nombreDimageDansUnEtat;//compteur d'images
@@ -265,5 +291,13 @@ void detruire_GUI(GUI* input);
  * @brief interface permettant de selectionner un joueur parmis une selectionée
  */
 unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, unsigned int messageTexture);
-
+/**
+ * @brief creer un afficheur de texte qui peut afficher une police donner en argument
+ */
+AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fenetre);
+/**
+ * @brief afficher avec un afficheur de texte
+ * @param scale unité arbitraire 1 = 48 px
+ */
+void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float scale);
 #endif // !INTERFACE

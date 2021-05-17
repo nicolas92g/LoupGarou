@@ -4,7 +4,7 @@ int main() {
     
     GLFWwindow* fenetre;
     creerLaFenetre(&fenetre);
-    
+
     GUI input = make_GUI(fenetre);
 
     recupererLeNombreDeJoueurs(&input);

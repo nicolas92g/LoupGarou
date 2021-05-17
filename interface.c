@@ -470,6 +470,7 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.shader = compilerLeShader(PROJECT_PATH"interface.vert", PROJECT_PATH"interface.frag");
     ret.cam = make_Camera(fenetre);
     ret.deco = make_Decoration(fenetre);
+    ret.texte = make_afficheurDeTexte(PROJECT_PATH"textures/arial.ttf", fenetre);
 
     ret.combienDeJoueurQuestion = chargerUneTexture(PROJECT_PATH"textures/combienDeJoueurQuestion.png");
     ret.afficherCarteTexture = chargerUneTexture(PROJECT_PATH"textures/carteDuJoueur.png");
@@ -510,7 +511,6 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.nombreDeJoueur = 0;
 
    
-
     return ret;
 }
 
@@ -527,6 +527,8 @@ void recupererLeNombreDeJoueurs(GUI* input) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
+
+        afficherDuTexte(&input->texte, "coucou les cons wesh !", 10, 10, 40);
 
         mat4x4 model;
         mat4x4 translation;
@@ -884,6 +886,134 @@ unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsig
         input->nombreDimageDansUnEtat++;
     } while (!glfwWindowShouldClose(input->fenetre));
     exit(0);
+}
+
+AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fenetre) {
+    AfficheurDeTexte ret;
+    ret.shader = compilerLeShader(PROJECT_PATH"afficheurDeTexte.vert", PROJECT_PATH"afficheurDeTexte.frag");
+    ret.fenetre = fenetre;
+
+    FT_Library freetype;
+    FT_Face face;
+
+    //initialise freetype
+    if (FT_Init_FreeType(&freetype)) {
+        printf("l'initialisation de la biblioteque freetype n'a pas réussie !\n");
+        exit(EXIT_FAILURE);
+    }
+
+    //charge la police
+    if (FT_New_Face(freetype, policeChemin, 0, &face)) {
+        printf("le chargement de la police : %s n'a pas réussie !\n", policeChemin);
+        exit(EXIT_FAILURE);
+    }
+
+    //juste besoin d'un decalage d'un seul octet dans la texture
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    //taille d'un pixel de la police
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+    for (short c = 0; c < 128; c++)
+    {
+        //charger le charactere c
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+            printf("le chargement du charactere : %c n'a pas reussie\n", c);
+            continue;
+        }
+
+        //creer le systeme d'affichage pour ce charactere :
+        Charactere C;
+
+        //creation de la texture du charactere
+        glGenTextures(1, &C.texture);
+        glBindTexture(GL_TEXTURE_2D, C.texture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows,
+            0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
+
+        //parametre la texture
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        //stockage des parametres d'affichage du charactere
+        C.decalageX = face->glyph->bitmap_left;
+        C.decalageY = face->glyph->bitmap_top;
+        C.largeur = face->glyph->bitmap.width;
+        C.hauteur = face->glyph->bitmap.rows;
+        C.avance = face->glyph->advance.x;
+
+        //ajouter le charactere au tableau de characteres
+        ret.tableauDeCharacteres[c] = C;
+    }
+
+    //quitter freetype
+    FT_Done_Face(face);
+    FT_Done_FreeType(freetype);
+
+    //creer un vertex array
+    glGenVertexArrays(1, &ret.VAO);
+    glBindVertexArray(ret.VAO);
+
+    //allouer de la memoire dynamique dans la carte graphique
+    glGenBuffers(1, &ret.VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, ret.VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+
+    //definit comment acceder a la memoire
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+
+    //sort de ces objets
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    return ret;
+}
+
+void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float scale) {
+    glUseProgram(r->shader);
+    glBindVertexArray(r->VAO);
+    glActiveTexture(GL_TEXTURE0);
+
+    int width, height;
+    glfwGetWindowSize(r->fenetre, &width, &height);
+
+    mat4x4 projection = ProjectionOrthographique(0, width, 0, height, -10, 10);
+
+    glUniformMatrix4fv(glGetUniformLocation(r->shader, "projection"), 1, GL_FALSE, &projection.col0.x);
+
+    for (short i = 0; i < strlen(text); i++)
+    {
+        const Charactere C = r->tableauDeCharacteres[text[i]];
+        const float positionX = x + C.decalageX * scale;
+        const float positionY = y - (C.hauteur - C.decalageY) * scale;
+
+        const float l = C.largeur * scale;
+        const float h = C.hauteur * scale;
+
+        float vertices[6][4] = {
+            { positionX,     positionY + h,   0.0f, 0.0f },
+            { positionX,     positionY,       0.0f, 1.0f },
+            { positionX + l, positionY,       1.0f, 1.0f },
+
+            { positionX,     positionY + h,   0.0f, 0.0f },
+            { positionX + l, positionY,       1.0f, 1.0f },
+            { positionX + l, positionY + h,   1.0f, 0.0f }
+        };
+
+        glBindTexture(GL_TEXTURE_2D, C.texture);
+        glBindBuffer(GL_ARRAY_BUFFER, r->VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        x += (C.avance >> 6) * scale;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glBindVertexArray(0);
 }
 
 void detruire_GUI(GUI* input)
