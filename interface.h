@@ -123,11 +123,13 @@ typedef struct GUI {
 	unsigned long long nombreDimageDansUnEtat;//compteur d'images
 	unsigned int shader;					//shader pour afficher l'interface
 
+	//un boutton pour choisir un nombre entre 1 et 18
+	Boutton bouttons[18];							//un boutton par joueurs
+
 	//ecran de depart
 	Boutton lancerLaPartie;
 
 	//combien de joueur ?
-	Boutton bouttons[11];							//un boutton par nombre de joueurs de 8 a 18
 	unsigned int nombresTextures[18];
 
 	unsigned int combienDeJoueurQuestion;	//stocke la texture de la question
@@ -139,11 +141,21 @@ typedef struct GUI {
 	//assignation des roles
 	unsigned short roleAMontrer;
 
-	enum Etat {
-		ETAT_ECRAN_DE_DEPART,
-		ETAT_COMBIEN_DE_JOUEUR
-	} etat;									//permet de stocker quelle page est a afficher
+	//roles :
+	unsigned int voiciLeRoleDuJoueurTexture;//texture qui affiche un message
+	unsigned int cliquerPourSortirTexture;//texture qui affiche un message
+
+
+
 } GUI;
+/**
+ * @brief permet de stocker l'action que souhaite effectuer un joueur
+ */
+typedef enum Actions {
+	SORCIERE_RIEN_FAIRE,
+	SORCIERE_TUER,
+	SORCIERE_SAUVER
+}Actions;
 
 /**
  * @brief creer une fenetre avec glfw
@@ -242,12 +254,16 @@ void recupererLeNombreDeJoueurs(GUI* input);
  */
 void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles);
 /**
+ * @brief utile pour montrer le role d'un joueur a la voyante
+ */
+void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur);
+/**
  * @brief detruit l'objet GUI
  */
 void detruire_GUI(GUI* input);
 /**
  * @brief interface permettant de selectionner un joueur parmis une selectionée
  */
-unsigned short choisirUnJoueur(unsigned short* listeDeJoueursEnVie, unsigned short nombreDeJoueursEnVie );
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, unsigned int messageTexture);
 
 #endif // !INTERFACE

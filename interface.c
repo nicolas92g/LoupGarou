@@ -17,7 +17,7 @@ void creerLaFenetre(GLFWwindow** window) {
     
     //mettre une icone a la fenetre
     GLFWimage icon;
-    icon.pixels = stbi_load(PROJECT_PATH"loupGarou.png", &icon.width, &icon.height, NULL, 4);
+    icon.pixels = stbi_load(PROJECT_PATH"textures/loupGarou.png", &icon.width, &icon.height, NULL, 4);
     glfwSetWindowIcon(*window, 1, &icon);
 
     //on teste si la fentre a été créée correctement
@@ -398,7 +398,7 @@ void carteQuiSeDevoile(Decoration* deco, Role role) {
         startTime = glfwGetTime();
         ancienRole = role;
     }
-    if (role < 1) {
+    if (role < 0) {
         startTime = glfwGetTime();
         role = ROLE_LOUP_GAROU;
     }
@@ -465,7 +465,6 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.lancerLaPartie.alpha = 0.1;
 
     ret.fenetre = fenetre;
-    ret.etat = ETAT_ECRAN_DE_DEPART;
 
     ret.carre = creerUnCarre();
     ret.shader = compilerLeShader(PROJECT_PATH"interface.vert", PROJECT_PATH"interface.frag");
@@ -495,9 +494,12 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.nombresTextures[16] = chargerUneTexture(PROJECT_PATH"textures/dixSept.png");
     ret.nombresTextures[17] = chargerUneTexture(PROJECT_PATH"textures/dixHuit.png");
 
+    ret.voiciLeRoleDuJoueurTexture = chargerUneTexture(PROJECT_PATH"textures/voiciLeRoleDuJoueur.png");
+    ret.cliquerPourSortirTexture = chargerUneTexture(PROJECT_PATH"textures/cliquerPourSortir.png");
+
     unsigned int blancTexture = chargerUneTexture(PROJECT_PATH"textures/blanc.png");
 
-    for (size_t i = 0; i < 11; i++)
+    for (size_t i = 0; i < 18; i++)
     {
         ret.bouttons[i] = make_Boutton(0, 0, 10, 10, blancTexture, fenetre);
         (ret.bouttons + i)->alpha = .2f;
@@ -507,11 +509,17 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.roleAMontrer = 0;
     ret.nombreDeJoueur = 0;
 
+   
+
     return ret;
 }
 
 void recupererLeNombreDeJoueurs(GUI* input) {
-    input->etat = ETAT_ECRAN_DE_DEPART;
+    enum Etat {
+        ETAT_ECRAN_DE_DEPART,
+        ETAT_COMBIEN_DE_JOUEUR
+    } etat = ETAT_ECRAN_DE_DEPART; //permet de stocker quelle page est a afficher
+
     do
     {
         int width, height;
@@ -524,7 +532,7 @@ void recupererLeNombreDeJoueurs(GUI* input) {
         mat4x4 translation;
         mat4x4 taille;
 
-        switch (input->etat)
+        switch (etat)
         {
         case ETAT_ECRAN_DE_DEPART:
             //affiche l'arriere plan
@@ -542,7 +550,7 @@ void recupererLeNombreDeJoueurs(GUI* input) {
 
             //test si le boutton est clicker
             if (input->lancerLaPartie.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
-                input->etat = ETAT_COMBIEN_DE_JOUEUR;
+                etat = ETAT_COMBIEN_DE_JOUEUR;
                 input->nombreDimageDansUnEtat = 0;
             }
             break;
@@ -621,6 +629,9 @@ void recupererLeNombreDeJoueurs(GUI* input) {
 }
 
 void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
+    mat4x4 model;
+    mat4x4 translation;
+    mat4x4 taille;
     do {
 
         int width, height;
@@ -628,11 +639,6 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
-
-        //matrices
-        static mat4x4 model;
-        static mat4x4 translation;
-        static mat4x4 taille;
 
         //met a jour la camera pour la 2D
         updateCamera2D(&input->cam, input->shader);
@@ -642,11 +648,11 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
 
         //actions en cas de clique
         if (cliquer && !glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT) && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 2.0 * (montrer + .1)) {
-            if (montrer) {
+            montrer = !montrer;
+            if (!montrer) {
                 input->roleAMontrer++;
             }
             input->nombreDimageDansUnEtat = 0;
-            montrer = !montrer;
         }
         cliquer = glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT);
 
@@ -724,9 +730,160 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
     exit(0);
 }
 
-unsigned short choisirUnJoueur(unsigned short* listeDeJoueursEnVie, unsigned short nombreDeJoueursEnVie)
+void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
+    mat4x4 model;
+    mat4x4 translation;
+    mat4x4 taille;
+    do {
+
+        int width, height;
+        glfwGetWindowSize(input->fenetre, &width, &height);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
+
+        //met a jour la camera pour la 2D
+        updateCamera2D(&input->cam, input->shader);
+
+        if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 4) {
+            //prepare la matrice
+            translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
+            taille = matriceDeTaille(height * .9f, height * .09f, 1);
+            model = multiplicationDeMatrices(&translation, &taille);
+
+            //envoie la matrice au shader et le filtre alpha
+            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+            glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 + .2);
+            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+            //affiche la question
+            glUseProgram(input->shader);
+            glBindVertexArray(input->carre);
+            glBindTexture(GL_TEXTURE_2D, input->cliquerPourSortirTexture);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            if (glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT)) {
+                input->nombreDimageDansUnEtat = 0;
+                return;
+            }
+        }
+        else {
+            //prepare la matrice
+            translation = matriceDeTranslation(width * .45f, height * 0.95f, 0);
+            taille = matriceDeTaille(height * .9f, height * .09f, 1);
+            model = multiplicationDeMatrices(&translation, &taille);
+
+            //envoie la matrice au shader et le filtre alpha
+            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+            glUniform1f(glGetUniformLocation(input->shader, "alpha"), 0);
+            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+            //affiche la texture
+            glUseProgram(input->shader);
+            glBindVertexArray(input->carre);
+            glBindTexture(GL_TEXTURE_2D, input->voiciLeRoleDuJoueurTexture);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //prepare la matrice
+            translation = matriceDeTranslation(width * .45f + height * .5, height * 0.95f, 0);
+            taille = matriceDeTaille(height * .09f, height * .09f, 1);
+            model = multiplicationDeMatrices(&translation, &taille);
+
+            //envoie la matrice au shader et le filtre alpha
+            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+            glUniform1f(glGetUniformLocation(input->shader, "alpha"), 0);
+            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+            //affiche le numero du joueur
+            glUseProgram(input->shader);
+            glBindVertexArray(input->carre);
+            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[joueur - 1]);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
+
+
+        //animation d'une carte qui se devoile pour donner le role a chaque joueur
+        carteQuiSeDevoile(&input->deco, role);
+        
+        
+        input->nombreDimageDansUnEtat++;
+        //finir l'image
+        glfwSwapBuffers(input->fenetre);
+        glfwPollEvents();
+    } while (!glfwWindowShouldClose(input->fenetre));
+    exit(0);
+}
+
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, unsigned int message)
 {
-    return 0;
+    int width, height;
+    input->nombreDimageDansUnEtat = 0;
+    
+    mat4x4 model;
+    mat4x4 translation;
+    mat4x4 taille;
+
+    do
+    {
+        glfwGetWindowSize(input->fenetre, &width, &height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
+
+        rotationsEnCercle(&input->deco);
+
+        updateCamera2D(&input->cam, input->shader);
+
+        //prepare la matrice
+        translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
+        taille = matriceDeTaille(height, height * .09f, 1);
+        model = multiplicationDeMatrices(&translation, &taille);
+
+        //affichage
+        glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
+        glUniform1f(glGetUniformLocation(input->shader, "alpha"), .0f);
+        glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
+
+        glUseProgram(input->shader);
+        glBindVertexArray(input->carre);
+        glBindTexture(GL_TEXTURE_2D, message);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+        unsigned short lignes = 0;
+        //affichage des bouttons pour choisir le nbr de joueurs
+        for (size_t i = 0; i < nombreDeJoueurs; i++)
+        {
+            //si i est un multiple de 3 non nul alors sauter une ligne
+            if (!(i % 5) && i) lignes++;
+
+            //position et taille de chaque bouttons;
+            input->bouttons[listeDeJoueurs[i] - 1].x = i % 5 * height * .21f + (width * .5f - height * .42f);
+            input->bouttons[listeDeJoueurs[i] - 1].y = height * .78f - lignes * height * .21f;
+            input->bouttons[listeDeJoueurs[i] - 1].l = height * .2f;
+            input->bouttons[listeDeJoueurs[i] - 1].h = height * .2f;
+
+            //affichage du boutton
+            afficherBoutton(&input->bouttons[listeDeJoueurs[i] - 1], input->shader);
+
+            //affichage du nombre sur le boutton
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[listeDeJoueurs[i] - 1]);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            //si un boutton est clicker et que la page s'est afficher suffisament longtemps
+            if (input->bouttons[listeDeJoueurs[i] - 1].viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+                return listeDeJoueurs[i];
+            }
+        }
+
+        glfwPollEvents();
+        glfwSwapBuffers(input->fenetre);
+        input->nombreDimageDansUnEtat++;
+    } while (!glfwWindowShouldClose(input->fenetre));
+    exit(0);
 }
 
 void detruire_GUI(GUI* input)
