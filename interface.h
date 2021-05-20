@@ -150,7 +150,7 @@ typedef struct GUI {
 	unsigned int shader;					//shader pour afficher l'interface
 
 	//un boutton pour choisir un nombre entre 1 et 18
-	Boutton bouttons[18];							//un boutton par joueurs
+	Boutton bouttons[18];					//un boutton par joueur
 
 	//ecran de depart
 	Boutton lancerLaPartie;
@@ -158,20 +158,16 @@ typedef struct GUI {
 	//combien de joueur ?
 	unsigned int nombresTextures[18];
 
-	unsigned int combienDeJoueurQuestion;	//stocke la texture de la question
-	unsigned short nombreDeJoueur;			//stocke la reponse
+	unsigned short nombreDeJoueur;			//stocke le nombre de joueurs qui veulent jouer
 
-	unsigned int afficherCarteTexture;		//stocke une texture
-	unsigned int cacherCarteTexture;		//stocke une texture
 
 	//assignation des roles
 	unsigned short roleAMontrer;
 
-	//roles :
-	unsigned int voiciLeRoleDuJoueurTexture;//texture qui affiche un message
-	unsigned int cliquerPourSortirTexture;//texture qui affiche un message
-
-
+	//sorciere
+	Boutton tuer;
+	Boutton rienFaire;
+	Boutton sauver;
 
 } GUI;
 /**
@@ -290,7 +286,7 @@ void detruire_GUI(GUI* input);
 /**
  * @brief interface permettant de selectionner un joueur parmis une selectionée
  */
-unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, unsigned int messageTexture);
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const char* messageTexture, float textAlignement);
 /**
  * @brief creer un afficheur de texte qui peut afficher une police donner en argument
  */
@@ -300,4 +296,8 @@ AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fen
  * @param scale unité arbitraire 1 = 48 px
  */
 void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float scale);
+/**
+ * @brief permet de demander a la sorciere ce quelle veut faire
+ */
+Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTué);
 #endif // !INTERFACE

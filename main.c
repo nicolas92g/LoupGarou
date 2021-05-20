@@ -7,7 +7,13 @@ int main() {
 
     GUI input = make_GUI(fenetre);
 
+    unsigned short joueurs[18] = { 1, 12, 3, 8, 5, 6, 7, 4, 9, 10, 11, 2, 13, 14, 15, 16, 17, 18 };
+
+    printf("%d\n", choisirUnJoueur(&input, joueurs, 18, "choisisez un Joueur a tuer", .28));
+
     recupererLeNombreDeJoueurs(&input);
+
+    ActionsSorciere(&input, false, true, 12);
 
     Role roles[18];
 
@@ -17,11 +23,10 @@ int main() {
 
     montrerLeRoleDeChaqueJoueurs(&input, roles);
 
-    unsigned short joueurs[18] = { 1, 12, 3, 8, 5, 6, 7, 4, 9, 10, 11, 2, 13, 14, 15, 16, 17, 18};
-    
-    printf("%d\n", choisirUnJoueur(&input, joueurs, 2, chargerUneTexture(PROJECT_PATH"textures/choisissezUnJoueur.png")));
-
     montrerLeRoleDuJoueur(&input, ROLE_CHASSEUR, 2);
+    montrerLeRoleDuJoueur(&input, ROLE_CUPIDON, 4);
+    montrerLeRoleDuJoueur(&input, ROLE_VILLAGEOIS, 18);
+    montrerLeRoleDuJoueur(&input, ROLE_CHASSEUR, 10);
 
 
     //finir le programme

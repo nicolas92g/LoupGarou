@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define TEXTE_RESOLUTION 128
+
 void creerLaFenetre(GLFWwindow** window) {
 
     glfwInit();//initialise la librairie glfw
@@ -470,11 +472,7 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.shader = compilerLeShader(PROJECT_PATH"interface.vert", PROJECT_PATH"interface.frag");
     ret.cam = make_Camera(fenetre);
     ret.deco = make_Decoration(fenetre);
-    ret.texte = make_afficheurDeTexte(PROJECT_PATH"textures/arial.ttf", fenetre);
-
-    ret.combienDeJoueurQuestion = chargerUneTexture(PROJECT_PATH"textures/combienDeJoueurQuestion.png");
-    ret.afficherCarteTexture = chargerUneTexture(PROJECT_PATH"textures/carteDuJoueur.png");
-    ret.cacherCarteTexture = chargerUneTexture(PROJECT_PATH"textures/cacherCarte.png");
+    ret.texte = make_afficheurDeTexte(PROJECT_PATH"textures/Roboto-Light.ttf", fenetre);
 
     ret.nombresTextures[0] = chargerUneTexture(PROJECT_PATH"textures/un.png");
     ret.nombresTextures[1] = chargerUneTexture(PROJECT_PATH"textures/deux.png");
@@ -495,9 +493,6 @@ GUI make_GUI(GLFWwindow* fenetre) {
     ret.nombresTextures[16] = chargerUneTexture(PROJECT_PATH"textures/dixSept.png");
     ret.nombresTextures[17] = chargerUneTexture(PROJECT_PATH"textures/dixHuit.png");
 
-    ret.voiciLeRoleDuJoueurTexture = chargerUneTexture(PROJECT_PATH"textures/voiciLeRoleDuJoueur.png");
-    ret.cliquerPourSortirTexture = chargerUneTexture(PROJECT_PATH"textures/cliquerPourSortir.png");
-
     unsigned int blancTexture = chargerUneTexture(PROJECT_PATH"textures/blanc.png");
 
     for (size_t i = 0; i < 18; i++)
@@ -509,6 +504,16 @@ GUI make_GUI(GLFWwindow* fenetre) {
 
     ret.roleAMontrer = 0;
     ret.nombreDeJoueur = 0;
+
+    ret.tuer = make_Boutton(1, 1, 1, 1, chargerUneTexture(PROJECT_PATH"textures/tuer.png"), fenetre);
+    ret.rienFaire = make_Boutton(1, 1, 1, 1, chargerUneTexture(PROJECT_PATH"textures/rienFaire.png"), fenetre);
+    ret.sauver = make_Boutton(1, 1, 1, 1, chargerUneTexture(PROJECT_PATH"textures/sauver.png"), fenetre);
+    ret.tuer.filtreHover = true;
+    ret.rienFaire.filtreHover = true;
+    ret.sauver.filtreHover = true;
+    ret.tuer.alpha = .1;
+    ret.rienFaire.alpha = .1;
+    ret.sauver.alpha = .1;
 
    
     return ret;
@@ -527,12 +532,6 @@ void recupererLeNombreDeJoueurs(GUI* input) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
-
-        afficherDuTexte(&input->texte, "coucou les cons wesh !", 10, 10, 40);
-
-        mat4x4 model;
-        mat4x4 translation;
-        mat4x4 taille;
 
         switch (etat)
         {
@@ -564,22 +563,7 @@ void recupererLeNombreDeJoueurs(GUI* input) {
             //met a jour la camera pour la 2D
             updateCamera2D(&input->cam, input->shader);
 
-            //prepare la matrice
-            translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
-            taille = matriceDeTaille(height * 1.0f, height * .09f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //envoie la matrice au shader et le filtre alpha
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUniform1f(glGetUniformLocation(input->shader, "alpha"), .1f);
-            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-            //affiche la question
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->combienDeJoueurQuestion);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            afficherDuTexte(&input->texte, "Combien de Joueurs etes vous ?", width * .5 - height * .55, height * .92, height * .08);
 
             //sert de compteur de lignes pour l'entree du nombre de joueur
             static int lignes;
@@ -631,9 +615,6 @@ void recupererLeNombreDeJoueurs(GUI* input) {
 }
 
 void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
-    mat4x4 model;
-    mat4x4 translation;
-    mat4x4 taille;
     do {
 
         int width, height;
@@ -671,22 +652,7 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
         //si on dois montrer la carte
         if (montrer) {
             if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 2.2) {
-                //prepare la matrice
-                translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
-                taille = matriceDeTaille(height * .9f, height * .09f, 1);
-                model = multiplicationDeMatrices(&translation, &taille);
-
-                //envoie la matrice au shader et le filtre alpha
-                glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-                glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 + .1);
-                glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-                //affiche la question
-                glUseProgram(input->shader);
-                glBindVertexArray(input->carre);
-                glBindTexture(GL_TEXTURE_2D, input->cacherCarteTexture);
-
-                glDrawArrays(GL_TRIANGLES, 0, 6);
+                afficherDuTexte(&input->texte, "cliquer pour cacher votre carte", width * .5 - height * .3, height * .95, height * .05);
             }
 
             //animation d'une carte qui se devoile pour donner le role a chaque joueur
@@ -694,32 +660,9 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
         }
         //si la carte est encore cachée
         else {
-            //affiche l'instruction : clicquer pour afficher la carte du joueur 
-            //prepare la matrice
-            translation = matriceDeTranslation(width * .45f, height * 0.95f, 0);
-            taille = matriceDeTaille(height, height * .09f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //affichage
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 + .1);
-            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->afficherCarteTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            //affiche le numero du joueur
-            translation = matriceDeTranslation(width * .47f + height * .5, height * 0.95f, 0);
-            taille = matriceDeTaille(height * .08f, height * .08f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //affichqge
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[input->roleAMontrer]);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            char texte[48];
+            sprintf_s(texte, 48, "cliquer pour devoiler la carte du Joueur %d", input->roleAMontrer  + 1);
+            afficherDuTexte(&input->texte, texte, width * .5 - height * .45, height * .95, height * .05);
 
             //montre juste une carte cachée
             carteQuiSeDevoile(&input->deco, -1);
@@ -733,9 +676,6 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
 }
 
 void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
-    mat4x4 model;
-    mat4x4 translation;
-    mat4x4 taille;
     do {
 
         int width, height;
@@ -748,61 +688,16 @@ void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
         updateCamera2D(&input->cam, input->shader);
 
         if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 4) {
-            //prepare la matrice
-            translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
-            taille = matriceDeTaille(height * .9f, height * .09f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //envoie la matrice au shader et le filtre alpha
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUniform1f(glGetUniformLocation(input->shader, "alpha"), (sin(input->nombreDimageDansUnEtat * .04) + 1) * .45 + .2);
-            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-            //affiche la question
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->cliquerPourSortirTexture);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            afficherDuTexte(&input->texte, "cliquer pour sortir", width * .5 - height * .2, height * .95, height * .05);
             if (glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT)) {
                 input->nombreDimageDansUnEtat = 0;
                 return;
             }
         }
         else {
-            //prepare la matrice
-            translation = matriceDeTranslation(width * .45f, height * 0.95f, 0);
-            taille = matriceDeTaille(height * .9f, height * .09f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //envoie la matrice au shader et le filtre alpha
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUniform1f(glGetUniformLocation(input->shader, "alpha"), 0);
-            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-            //affiche la texture
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->voiciLeRoleDuJoueurTexture);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-
-            //prepare la matrice
-            translation = matriceDeTranslation(width * .45f + height * .5, height * 0.95f, 0);
-            taille = matriceDeTaille(height * .09f, height * .09f, 1);
-            model = multiplicationDeMatrices(&translation, &taille);
-
-            //envoie la matrice au shader et le filtre alpha
-            glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-            glUniform1f(glGetUniformLocation(input->shader, "alpha"), 0);
-            glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-            //affiche le numero du joueur
-            glUseProgram(input->shader);
-            glBindVertexArray(input->carre);
-            glBindTexture(GL_TEXTURE_2D, input->nombresTextures[joueur - 1]);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            char text[27];
+            sprintf_s(&text, 27, "voici le role du Joueur %d", joueur);
+            afficherDuTexte(&input->texte, text, width * .5 - height * .25, height * .95, height * .05);
         }
 
 
@@ -818,7 +713,7 @@ void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
     exit(0);
 }
 
-unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, unsigned int message)
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const char* message, float textAlignement)
 {
     int width, height;
     input->nombreDimageDansUnEtat = 0;
@@ -835,23 +730,9 @@ unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsig
 
         rotationsEnCercle(&input->deco);
 
+        afficherDuTexte(&input->texte, message, width * .5 - height * textAlignement, height * .95, height * .05);
+
         updateCamera2D(&input->cam, input->shader);
-
-        //prepare la matrice
-        translation = matriceDeTranslation(width * .5f, height * 0.95f, 0);
-        taille = matriceDeTaille(height, height * .09f, 1);
-        model = multiplicationDeMatrices(&translation, &taille);
-
-        //affichage
-        glUniformMatrix4fv(glGetUniformLocation(input->shader, "model"), 1, GL_FALSE, &model.col0.x);
-        glUniform1f(glGetUniformLocation(input->shader, "alpha"), .0f);
-        glUniform3f(glGetUniformLocation(input->shader, "filtre"), 1, 1, 1);
-
-        glUseProgram(input->shader);
-        glBindVertexArray(input->carre);
-        glBindTexture(GL_TEXTURE_2D, message);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
         unsigned short lignes = 0;
         //affichage des bouttons pour choisir le nbr de joueurs
@@ -912,7 +793,7 @@ AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fen
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     //taille d'un pixel de la police
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, TEXTE_RESOLUTION);
 
     for (short c = 0; c < 128; c++)
     {
@@ -977,6 +858,8 @@ void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float 
     glBindVertexArray(r->VAO);
     glActiveTexture(GL_TEXTURE0);
 
+    scale /= (float)TEXTE_RESOLUTION;
+
     int width, height;
     glfwGetWindowSize(r->fenetre, &width, &height);
 
@@ -1019,4 +902,72 @@ void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float 
 void detruire_GUI(GUI* input)
 {
     glDeleteVertexArrays(1, &input->carre);
+}
+
+Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTuée){
+    do
+    {
+        int width, height;
+        glfwGetWindowSize(input->fenetre, &width, &height);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
+
+        if(joueurTuée < 0)
+            afficherDuTexte(&input->texte, "que voulez faire ?", width * .5 - height * .18, height * .95, height * .05);
+        else {
+            char buffer[50];
+            sprintf_s(buffer, 50, "le Joueur %d a ete tue, que voulez-vous faire ?", joueurTuée);
+            afficherDuTexte(&input->texte, buffer, width * .5 - height * .45, height * .95, height * .05);
+        }
+
+
+        rotationsEnCercle(&input->deco);
+
+        updateCamera2D(&input->cam, input->shader);
+
+        input->tuer.l = height * .2;
+        input->sauver.l = height * .2;
+        input->rienFaire.l = height * .2;
+        
+        input->tuer.h = height * .07;
+        input->sauver.h = height * .07;
+        input->rienFaire.h = height * .07;
+        
+        input->tuer.x = width * .25;
+        input->sauver.x = width * .75;
+        input->rienFaire.x = width * .5;
+
+        input->tuer.y = height * .5;
+        input->sauver.y = height * .5;
+        input->rienFaire.y = height * .5;
+
+        if (!peutTuer)
+            input->tuer.alpha = .7;
+        if(!peutSauver)
+            input->sauver.alpha = .7;
+
+        afficherBoutton(&input->tuer, input->shader);
+        afficherBoutton(&input->rienFaire, input->shader);
+        afficherBoutton(&input->sauver, input->shader);
+
+        if (input->tuer.viensDetreClicker && peutTuer && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+            return SORCIERE_TUER;
+            input->nombreDimageDansUnEtat = 0;
+        }
+        else if (input->rienFaire.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+            return SORCIERE_RIEN_FAIRE;
+            input->nombreDimageDansUnEtat = 0;
+        }
+        else if (input->sauver.viensDetreClicker && peutSauver && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) {
+            return SORCIERE_SAUVER;
+            input->nombreDimageDansUnEtat = 0;
+        }
+
+        glfwPollEvents();
+        glfwSwapBuffers(input->fenetre);
+
+        input->nombreDimageDansUnEtat++;
+    } while (!glfwWindowShouldClose(input->fenetre));
+    exit(0);
 }
