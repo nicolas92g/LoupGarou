@@ -33,6 +33,6 @@ enum {
 #define TTR 23 // TTR: Taille du TabRole
 #define TTRB 18// TTR: Taille du la Seconde Parti duTabRole
 
-int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur, int nLoupgarou);
+int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur);
 int attribution(int tabJoueur[], int tabRole[], int tabAttributionJoueur[], int tabAttributionRole[], int nJoueur, int nLoupgarou);
 int annoncementRole(int tabJoueur[], int nJoueur);

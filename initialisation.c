@@ -1,16 +1,16 @@
 #include "initialisation.h"
 
-int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur, int nLoupgarou) {
+int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur) {
 	
 	////Assignement des roles
 
 	if (nJoueur < 12) 
 	{
-		attribution(tabJoueur, tabRole, tabAttributionJoueur, tabAttributionRole, nJoueur, nLoupgarou);
+		attribution(tabJoueur, tabRole, tabAttributionJoueur, tabAttributionRole, nJoueur, 2);
 	}
 	else 
 	{
-		attribution(tabJoueur, tabRole, tabAttributionJoueur, tabAttributionRole, nJoueur, nLoupgarou);
+		attribution(tabJoueur, tabRole, tabAttributionJoueur, tabAttributionRole, nJoueur, 3);
 	}
 
 	//Annoncement des roles
