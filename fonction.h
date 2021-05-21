@@ -10,8 +10,10 @@
 #define FAUX 0
 
 int* initTab(int tab[], int taille, int a);
+int* initTabShort(unsigned short tab[], int taille, int a);
 int* initTab2(int tab[], int taille, int a);
 void afficherTableau(int tab[], int taille);
+void afficherTableau2(unsigned short tab[], int taille);
 void echangeCase(int tab[], int a, int b);
 int* copieTab(int tabA[], int tabB[], int taille);
 int voteSolo(int tabJoueur[], int nJoueur);

@@ -9,5 +9,6 @@
 void attribution(Role* tabRoles, unsigned short nbrDeJoueurs);
 int voteCapitaine(GUI* input);
 int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, int caseCapitaine);
-int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned short nbrDeJoueursEnVie);
 void fVoyante(GUI* input, Role* tabRoles);
+int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie);
+void fCupidon(GUI* input, Role* tabRoles, int tabCupidon[]);

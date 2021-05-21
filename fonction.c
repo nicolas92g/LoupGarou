@@ -9,6 +9,15 @@ int* initTab(int tab[], int taille, int a) {
 	return 0; //bizzare
 }
 
+int* initTabShort(unsigned short tab[], int taille, int a) {
+	int i;
+	for (i = 0;i < taille;i++)
+	{
+		tab[i] = a;
+	}
+	return 0; //bizzare
+}
+
 int* initTab2(int tab[], int taille, int a) {
 	int i;
 	for (i = 0 ;i < taille;i++)
@@ -27,6 +36,19 @@ void afficherTableau(int tab[], int taille) {
 
 	printf("\n");
 }
+
+void afficherTableau2(unsigned short tab[], int taille) {
+	int i;
+
+	for (i = 0; i < taille; i++)
+	{
+		printf("[%d] ", tab[i]);
+	}
+
+	printf("\n");
+}
+
+
 
 void echangeCase(int tab[], int a, int b)
 {
