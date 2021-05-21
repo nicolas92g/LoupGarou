@@ -78,11 +78,12 @@ void attribution(Role* tabRoles, unsigned short nbrDeJoueurs) {
 	tabRoles[joueurAlea] = roleAlea;
 }
 
-int voteCapitaine(GUI* input, unsigned short nbrDeJoueurs) {
+int voteCapitaine(GUI* input) {
 	int i = 0;
 	int caseAyantLePLusDeVote = 0;
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurElu = 0;
+	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
 	bool egalite_i = FAUX; // _i = ?
 	bool vote_i = FAUX; // _i = ?
 	//tab
@@ -93,15 +94,13 @@ int voteCapitaine(GUI* input, unsigned short nbrDeJoueurs) {
 	srand((unsigned)time(&t));
 	//
 
-	printf("\nC'est le moment de voter pour le capitaine.\n");
-
 	int caseJoueur = 0;
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
 		vote_i = FAUX;
 
-		while (vote_i == FAUX)
+		while (!vote_i)
 		{
 			char text[42];
 			sprintf_s(text, 42, "Le Joueur %d doit voter pour un capitaine", i + 1);
@@ -110,12 +109,8 @@ int voteCapitaine(GUI* input, unsigned short nbrDeJoueurs) {
 			if (caseJoueur < nbrDeJoueurs)
 			{
 				tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-				afficherTableau(tabVote, nbrDeJoueurs);
+				//afficherTableau(tabVote, nbrDeJoueurs);
 				vote_i = VRAI;
-			}
-			else
-			{
-				printf("Vous devez saisir un joueur encore en vie.\n");
 			}
 		}
 	}
@@ -148,7 +143,7 @@ int voteCapitaine(GUI* input, unsigned short nbrDeJoueurs) {
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		afficherTableau(tabEgalite, 18);
+		//afficherTableau(tabEgalite, 18);
 	}
 	joueurElu = caseAyantLePLusDeVote;
 
@@ -162,12 +157,13 @@ int voteCapitaine(GUI* input, unsigned short nbrDeJoueurs) {
 	return joueurElu;
 }
 
-int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned short nbrDeJoueursEnVie, int caseCapitaine) {
+int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, int caseCapitaine) {
 	int i = 0;
 	int j = 0;
 	int caseAyantLePLusDeVote = 0;
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurElimine = 0;
+	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
 	bool egalite_i = FAUX; // _i = ?
 	bool vote_i = FAUX; // _i = ?
 	//tab
@@ -182,10 +178,11 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsig
 	{
 		if (tabRoles[i] != -1)
 		{
-			tabJoueurEnVie[j] = i;
+			tabJoueurEnVie[j] = i+1;
 			j += 1;
 		}
 	}
+	
 
 	int caseJoueur = 0;
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
@@ -195,21 +192,18 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsig
 
 		if (tabRoles[i] != -1)
 		{
-			while (vote_i == FAUX)
+			while (!vote_i)
 			{
-				char text[68];
-				sprintf_s(text, 68, "Le Joueur %d doit voter pour le joueur qu'il souhaite voir elimine.", i + 1);	
-				caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .45) - 1; //A changer
+				afficherTableau(tabJoueurEnVie, nbrDeJoueurs);
+				char text[69];
+				sprintf_s(text, 69, "Le Joueur %d doit voter pour le Joueur qu'il souhaite voir elimine.\n", i + 1);	
+				caseJoueur = choisirUnJoueur(input, tabRoles, nbrDeJoueursEnVie, text, .45) - 1; 
 
 				if (tabRoles[i] != -1 && caseJoueur < nbrDeJoueurs)
 				{
 					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
 					afficherTableau(tabVote, nbrDeJoueurs);
 					vote_i = VRAI;
-				}
-				else
-				{
-					printf("Vous devez saisir un joueur encore en vie.\n");
 				}
 			}
 		}

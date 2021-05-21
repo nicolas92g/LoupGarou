@@ -7,5 +7,6 @@
 #include "fonction.h"
 
 void attribution(Role* tabRoles, unsigned short nbrDeJoueurs);
-int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned short nbrDeJoueursEnVie, int caseCapitaine);
+int voteCapitaine(GUI* input);
+int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, int caseCapitaine);
 int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned short nbrDeJoueursEnVie);
