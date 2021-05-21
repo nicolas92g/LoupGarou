@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include "fonction.h"
-
+/*
 enum {
 	iloupgarou1,//0  
 	iloupgarou2,//1
@@ -35,4 +35,4 @@ enum {
 
 int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur);
 int attribution(int tabJoueur[], int tabRole[], int tabAttributionJoueur[], int tabAttributionRole[], int nJoueur, int nLoupgarou);
-int annoncementRole(int tabJoueur[], int nJoueur);
+int annoncementRole(int tabJoueur[], int nJoueur);*/

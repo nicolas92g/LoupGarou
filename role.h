@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "fonction.h"
-
+/*
 #define TTRB 18
 #define MORT -1
 #define VRAI 1
@@ -46,4 +46,4 @@ int fVoleur(int tabJoueur[], int tabRole[], int tabAssignationRole[], int nJoueu
 ////
 int identificationLoupGarouEnVie(int tabRole[]);
 
-int mortLoup(int tabRole[], int joueur);
+int mortLoup(int tabRole[], int joueur);*/

@@ -1,6 +1,6 @@
 #include "initialisation.h"
 
-int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabRole[], int tabAttributionRole[], int nJoueur) {
+/*int initialisation(int tabJoueur[], int tabAttributionJoueur[], int tabAttributionRole[], int nJoueur) {
 	
 	////Assignement des roles
 
@@ -140,4 +140,4 @@ int annoncementRole(int tabJoueur[], int nJoueur) {
 		}
 		printf(".\n");
 	}
-}
+}/*/

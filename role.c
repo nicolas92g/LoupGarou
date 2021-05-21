@@ -1,5 +1,5 @@
 #include "role.h"
-
+/*
 int reconaissanceRole(int role)
 {
 	switch (role)
@@ -387,4 +387,4 @@ int mortLoup(int tabRole[], int joueur)
 	{
 		return 0;
 	}
-}
+}*/

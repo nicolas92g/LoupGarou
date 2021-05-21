@@ -1,6 +1,6 @@
 #include "deroulement.h"
 
-int deroulement(int tabJoueur[], int tabJoueurInit[], int tabRole[], int tabVote[], int tabEgalite[], int tabAssignationRole[], int nJoueur, int nLoupgarou)
+/*int deroulement(int tabJoueur[], int tabJoueurInit[], int tabRole[], int tabVote[], int tabEgalite[], int tabAssignationRole[], int nJoueur, int nLoupgarou)
 {
 	int tabRoleInit[TTR];
 	int* tabCupidon[2]; //indique les deux joueurs en couple
@@ -190,7 +190,7 @@ int voteCapitaine(int tabJoueur[], int tabRole[], int tabVote[], int tabEgalite[
 	{
 		if (tabVote[i] > tabVote[caseAyantLePLusDeVote])
 		{
-			if (egalite_i == VRAI)
+			if (egalite_i)
 			{
 				initTab(tabEgalite, nJoueur, -1);
 			}
@@ -200,7 +200,7 @@ int voteCapitaine(int tabJoueur[], int tabRole[], int tabVote[], int tabEgalite[
 		}
 		else if (tabVote[caseAyantLePLusDeVote] == tabVote[i])
 		{
-			if(egalite_i == FAUX)
+			if(!egalite_i)
 			{
 				initTab(tabEgalite, nJoueur, -1);
 				nCaseAyantLeMemeNombreDeVote = 1;
@@ -214,7 +214,7 @@ int voteCapitaine(int tabJoueur[], int tabRole[], int tabVote[], int tabEgalite[
 	}
 	joueurElu = caseAyantLePLusDeVote;
 
-	if (egalite_i == VRAI)
+	if (egalite_i)
 	{
 		printf("Des joueurs ont le meme nombres de vote. Le capitaine va etre defini de maniere aleatoire.\n");
 		joueurElu = tabEgalite[rand() % (nCaseAyantLeMemeNombreDeVote + 1)];
@@ -313,4 +313,4 @@ int voteMort(int tabJoueur[], int tabRole[], int tabVote[], int tabEgalite[], in
 	printf("Le joueur elimine est le joueur: %d.\n", joueurELimine);
 	tabRole[tabJoueur[joueurELimine]] = MORT;
 	tabJoueur[joueurELimine] = MORT;
-}
+}*/
