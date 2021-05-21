@@ -383,20 +383,30 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 	return joueurVote;
 }
 
-/*void fVoyante(GUI* input, Role* tabRoles, int nJoueur) {
-	int joueur;
-	int cVoyante = 0;
-	while (tabRoles[cVoyante] != ROLE_VOYANTE)
+void fVoyante(GUI* input, Role* tabRoles) {
+	//alloue un tableau de tous les joueurs que peut voir la voyante
+	unsigned short* joueursAVoir = (unsigned short*)calloc(input->nombreDeJoueur - 1, sizeof(unsigned short));
+	
+	//permet de stocker si on est déjà trouvé la voyante dans le tableau des roles
+	bool trouverLaSorciere = false;
+
+	//parcours le tableau des roles
+	for (unsigned short i = 0; i < input->nombreDeJoueur; i++)
 	{
-		cVoyante += 1;
+		if (tabRoles[i] == ROLE_VOYANTE) {
+			trouverLaSorciere = true;
+			continue;
+		}
+		if (!trouverLaSorciere && i < input->nombreDeJoueur - 1)
+			joueursAVoir[i] = (unsigned short)(i + 1);
+		else
+			joueursAVoir[i - 1] = (unsigned short)(i + 1);
 	}
 
-	printf("\nLa Voyante se reveille (soit le Joueur %d.)\n", cVoyante);
+	//la yoyante choisit un joueurs
+	unsigned short joueurAVoir = choisirUnJoueur(input, joueursAVoir, input->nombreDeJoueur - 1, "la voyante choisit un joueur a demasquer", .4);
 
-	printf("De quelle joueur voulez vous connaitre le role ?");
+	montrerLeRoleDuJoueur(input, tabRoles[joueurAVoir - 1], joueurAVoir);
 
-	joueur = voteSolo(tabJoueur, nJoueur);
-
-	reconaissanceRole(tabJoueur[joueur]);
-	printf(".\n");
-}*/
+	free(joueursAVoir);
+}
