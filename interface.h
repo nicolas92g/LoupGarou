@@ -26,7 +26,7 @@
 #define PROJECT_PATH "../../../../OneDrive/Documents/GitHub/LoupGarou/"
 
 //evite de clicker instantanement sur le boutton de l'interface d'apres en clickant sur un boutton
-#define NBR_MIN_DANS_UN_ETAT 60
+#define NBR_MIN_DANS_UN_ETAT 10
 
 /**
  * @permet de stocker un role dans le jeu

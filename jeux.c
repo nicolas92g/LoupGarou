@@ -169,7 +169,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 	//tab
 	int tabEgalite[18] = { -1 };
 	int tabVote[18] = { 0 };
-	int tabJoueurEnVie[18] = { -1 };
+	unsigned short tabJoueurEnVie[18] = { -1 };
 	//Alea
 	time_t t;
 	srand((unsigned)time(&t));
@@ -196,8 +196,8 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 			{
 				afficherTableau(tabJoueurEnVie, nbrDeJoueurs);
 				char text[69];
-				sprintf_s(text, 69, "Le Joueur %d doit voter pour le Joueur qu'il souhaite voir elimine.\n", i + 1);	
-				caseJoueur = choisirUnJoueur(input, tabRoles, nbrDeJoueursEnVie, text, .45) - 1; 
+				sprintf_s(text, 69, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);	
+				caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
 
 				if (tabRoles[i] != -1 && caseJoueur < nbrDeJoueurs)
 				{
@@ -209,7 +209,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		}
 	}
 
-	// Recherche du joueur le plus vote
+	// Recherche du joueur le plus voté
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
 	for (i = 1; i < nbrDeJoueurs; i++)
