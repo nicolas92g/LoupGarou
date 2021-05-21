@@ -971,3 +971,39 @@ Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueur
     } while (!glfwWindowShouldClose(input->fenetre));
     exit(0);
 }
+
+void afficherMessage(GUI* input, const char* message, float textAligment){
+
+    Boutton ok = make_Boutton(1, 1,1, 1, chargerUneTexture(PROJECT_PATH"textures/blanc.png"), input->fenetre);
+    ok.filtreHover = true;
+    ok.alpha = .2;
+
+    do
+    {
+        int width, height;
+        glfwGetWindowSize(input->fenetre, &width, &height);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
+
+        rotationsEnCercle(&input->deco);
+
+        afficherDuTexte(&input->texte, message, width * .5 - height * textAligment, height * .95, height * .05);
+
+        updateCamera2D(&input->cam, input->shader);
+
+        ok.l = width * .25;
+        ok.h = width * .1;
+        ok.x = width * .5;
+        ok.y = height * .5;
+        
+        afficherBoutton(&ok, input->shader);
+
+        afficherDuTexte(&input->texte, "OK", width * .5 - height * .03, height * 0.485, height * .05);
+
+        glfwPollEvents();
+        glfwSwapBuffers(input->fenetre);
+
+    } while (!glfwWindowShouldClose(input->fenetre));
+    exit(0);
+}

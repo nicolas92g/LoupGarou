@@ -300,4 +300,8 @@ void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float 
  * @brief permet de demander a la sorciere ce quelle veut faire
  */
 Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTué);
+/**
+ * @brief permet d'afficher un message a l'utilisateur
+ */
+void afficherMessage(GUI* input, const char* message, float textAligment);
 #endif // !INTERFACE
