@@ -206,7 +206,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		}
 	}
 
-	// Recherche du joueur le plus vot�
+	// Recherche du joueur le plus voté
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
 	for (i = 1; i < nbrDeJoueurs; i++)
@@ -337,7 +337,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 		}
 	}
 
-	// Recherche du joueur le plus vot�
+	// Recherche du joueur le plus voté
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
 	for (i = 1; i < nbrDeJoueurs; i++)
@@ -379,6 +379,34 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	printf("Vous avez eliminez le joueur: %d.\n", joueurVote);
 	tabRoles[joueurVote] = -1;
 	return joueurVote;
+}
+
+void fVoyante(GUI* input, Role* tabRoles) {
+	//alloue un tableau de tous les joueurs que peut voir la voyante
+	unsigned short* joueursAVoir = (unsigned short*)calloc(input->nombreDeJoueur - 1, sizeof(unsigned short));
+	
+	//permet de stocker si on est déjà trouvé la voyante dans le tableau des roles
+	bool trouverLaSorciere = false;
+
+	//parcours le tableau des roles
+	for (unsigned short i = 0; i < input->nombreDeJoueur; i++)
+	{
+		if (tabRoles[i] == ROLE_VOYANTE) {
+			trouverLaSorciere = true;
+			continue;
+		}
+		if (!trouverLaSorciere && i < input->nombreDeJoueur - 1)
+			joueursAVoir[i] = (unsigned short)(i + 1);
+		else
+			joueursAVoir[i - 1] = (unsigned short)(i + 1);
+	}
+
+	//la yoyante choisit un joueurs
+	unsigned short joueurAVoir = choisirUnJoueur(input, joueursAVoir, input->nombreDeJoueur - 1, "la voyante choisit un joueur a demasquer", .4);
+
+	montrerLeRoleDuJoueur(input, tabRoles[joueurAVoir - 1], joueurAVoir);
+
+	free(joueursAVoir);
 }
 
 void fCupidon(GUI* input, Role* tabRoles, int tabCupidon[])

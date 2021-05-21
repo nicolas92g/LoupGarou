@@ -687,7 +687,7 @@ void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
         //met a jour la camera pour la 2D
         updateCamera2D(&input->cam, input->shader);
 
-        if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 4) {
+        if (input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT * 20) {
             afficherDuTexte(&input->texte, "cliquer pour sortir", width * .5 - height * .2, height * .95, height * .05);
             if (glfwGetMouseButton(input->fenetre, GLFW_MOUSE_BUTTON_LEFT)) {
                 input->nombreDimageDansUnEtat = 0;
@@ -709,6 +709,7 @@ void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
         //finir l'image
         glfwSwapBuffers(input->fenetre);
         glfwPollEvents();
+
     } while (!glfwWindowShouldClose(input->fenetre));
     exit(0);
 }
