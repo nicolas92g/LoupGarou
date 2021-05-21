@@ -106,7 +106,7 @@ int voteCapitaine(GUI* input) {
 			sprintf_s(text, 42, "Le Joueur %d doit voter pour un capitaine", i + 1);
 			caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .45) - 1;
 
-			if (caseJoueur < nbrDeJoueurs)
+			if (caseJoueur <= nbrDeJoueurs)
 			{
 				tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
 				//afficherTableau(tabVote, nbrDeJoueurs);
@@ -167,9 +167,9 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 	bool egalite_i = FAUX; // _i = ?
 	bool vote_i = FAUX; // _i = ?
 	//tab
-	int tabEgalite[18] = { -1 };
+	unsigned short tabEgalite[18];
 	int tabVote[18] = { 0 };
-	unsigned short tabJoueurEnVie[18] = { -1 };
+	unsigned short tabJoueurEnVie[18];
 	//Alea
 	time_t t;
 	srand((unsigned)time(&t));
@@ -183,9 +183,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		}
 	}
 	
-
 	int caseJoueur = 0;
-	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
 		vote_i = FAUX;
@@ -194,12 +192,11 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		{
 			while (!vote_i)
 			{
-				afficherTableau(tabJoueurEnVie, nbrDeJoueurs);
-				char text[69];
-				sprintf_s(text, 69, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);	
+				char text[49];
+				sprintf_s(text, 49, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);	
 				caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
 
-				if (tabRoles[i] != -1 && caseJoueur < nbrDeJoueurs)
+				if (tabRoles[caseJoueur] != -1 && caseJoueur <= nbrDeJoueurs)
 				{
 					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
 					afficherTableau(tabVote, nbrDeJoueurs);
@@ -218,7 +215,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		{
 			if (egalite_i)
 			{
-				initTab(tabEgalite, 18, -1);
+				initTabShort(tabEgalite, 18, 20);
 			}
 
 			egalite_i = FAUX;
@@ -228,7 +225,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		{
 			if (!egalite_i)
 			{
-				initTab(tabEgalite, 18, -1);
+				initTabShort(tabEgalite, 18, 20);
 				nCaseAyantLeMemeNombreDeVote = 1;
 				tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = caseAyantLePLusDeVote;
 			}
@@ -237,85 +234,85 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		afficherTableau(tabEgalite, 18);
+		afficherTableau2(tabEgalite, 18);
 	}
 	joueurElimine = caseAyantLePLusDeVote;
 
 	if (egalite_i)
 	{
-		printf("Des joueurs ont le meme nombres de vote.\n Le joueur numero %d qui est le capitaine va choisir quelle joueur sera elimine.\n", caseCapitaine);
-
-		printf("Les joueurs a egalite sont les joueurs: ");
-
-		i = 0;
-		while (tabEgalite[i] != -1)
-		{
-			if (i > 0)
-			{
-				printf(",");
-			}
-			printf(" %d", tabEgalite[i]);
-			i += 1;
-		}
-		printf(".\n");
-
 		vote_i = FAUX;
+		for (i = 0; i < nCaseAyantLeMemeNombreDeVote; i++)
+		{
+			tabEgalite[i] += 1;
+		}
+
 		while (!vote_i)
 		{
-			char text[68];
-			sprintf_s(text, 68, "Le Joueur %d doit voter pour le joueur qu'il souhaite voir elimine.", i + 1);
-			joueurElimine = choisirUnJoueur(input, tabEgalite, nbrDeJoueurs, text, .45) - 1;
+			char text[48];
+			sprintf_s(text, 48, "Le capitaine, Joueur %d, doit eliminer un Joueur", i + 1);
+			joueurElimine = choisirUnJoueur(input, tabEgalite, nCaseAyantLeMemeNombreDeVote, text, .45) - 1;
 
 			if (tabVote[joueurElimine] == tabVote[caseAyantLePLusDeVote])
 			{
 				vote_i = VRAI;
 			}
-			else
-			{
-				printf("Vous devez saisir un joueur encore en vie.\n");
-			}
 		}
 	}
-
-	printf("Le joueur elimine est le joueur: %d.\n", joueurElimine);
 	return joueurElimine;
 }
 
-int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned short nbrDeJoueursEnVie)
+int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 {
 	int i;
 	int j = 0;
-	int caseJoueur;
+	int caseJoueur = 0;
 	int caseAyantLePLusDeVote = 0;
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurVote = 0;
+	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
 	//tab
-	int tabEgalite[18] = { -1 };
+	unsigned short tabEgalite[18];
 	int tabVote[18] = { 0 };
-	int tabJoueurEnVie[18] = { -1 };
+	unsigned short tabJoueurEnVie[18];
 	//bool
 	bool egalite_i = FAUX; // _i = ?
 	bool vote_i = FAUX; // _i = ?
-
 	//creation Tableau joueur en vie
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
 		if (tabRoles[i] != -1)
 		{
-			tabJoueurEnVie[j] = i;
+			tabJoueurEnVie[j] = i+1;
 			j += 1;
 		}
 	}
+	afficherTableau2(tabJoueurEnVie, nbrDeJoueursEnVie);
 
-	printf("\nLes loupgarou se reveille (Soit les joueurs suivants:");
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
-		if (tabRoles[i] = ROLE_LOUP_GAROU)
+		vote_i = FAUX;
+
+		if (tabRoles[i] != -1)
 		{
-			printf(" %d,", i + 1);
+			if (tabRoles[i] == ROLE_LOUP_GAROU)
+			{
+				while (!vote_i)
+				{
+					char text[49];
+					sprintf_s(text, 49, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);
+					caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
+					printf("TEST");
+
+					if (tabRoles[caseJoueur] != -1 && tabRoles[caseJoueur] != ROLE_LOUP_GAROU && caseJoueur <= nbrDeJoueurs)
+					{
+						tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
+						afficherTableau(tabVote, nbrDeJoueurs);
+						vote_i = VRAI;
+					}
+				}
+			}	
 		}
 	}
-	printf(").\n");
 
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -340,7 +337,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 		}
 	}
 
-	// Recherche du joueur le plus vote
+	// Recherche du joueur le plus voté
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
 	for (i = 1; i < nbrDeJoueurs; i++)
@@ -349,7 +346,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 		{
 			if (egalite_i)
 			{
-				initTab(tabEgalite, 18, -1);
+				initTabShort(tabEgalite, 18, 20);
 			}
 
 			egalite_i = FAUX;
@@ -359,7 +356,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 		{
 			if (!egalite_i)
 			{
-				initTab(tabEgalite, 18, -1);
+				initTabShort(tabEgalite, 18, 20);
 				nCaseAyantLeMemeNombreDeVote = 1;
 				tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = caseAyantLePLusDeVote;
 			}
@@ -368,9 +365,10 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		afficherTableau(tabEgalite, 18);
+		afficherTableau2(tabEgalite, 18);
 	}
 	joueurVote = caseAyantLePLusDeVote;
+	
 
 	if (egalite_i == VRAI)
 	{
@@ -383,20 +381,71 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueurs, unsigned
 	return joueurVote;
 }
 
-/*void fVoyante(GUI* input, Role* tabRoles, int nJoueur) {
-	int joueur;
-	int cVoyante = 0;
-	while (tabRoles[cVoyante] != ROLE_VOYANTE)
+void fCupidon(GUI* input, Role* tabRoles, int tabCupidon[])
+{
+	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
+	unsigned short caseJoueur;
+	unsigned short caseCupidon = 0;
+	unsigned short i;
+	//tab
+	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
+	//bool
+	bool vote_i = FAUX; // _i = ?
+
+	//Recherche de cupidon
+	while (tabRoles[caseCupidon] == ROLE_CUPIDON)
 	{
-		cVoyante += 1;
+		caseCupidon += 1;
 	}
 
-	printf("\nLa Voyante se reveille (soit le Joueur %d.)\n", cVoyante);
+	/*for (i = 0; i < 2; i++)
+	{
+		vote_i = FAUX;
 
-	printf("De quelle joueur voulez vous connaitre le role ?");
+		while (!vote_i)
+		{
+			char text[55];
+			sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, i + 1);
+			caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
 
-	joueur = voteSolo(tabJoueur, nJoueur);
+			if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
+			{
+				tabCupidon[i] = caseJoueur;
+				afficherTableau2(tabCupidon, 2);
+				vote_i = VRAI;
+			}
+		}
+	}*/
 
-	reconaissanceRole(tabJoueur[joueur]);
-	printf(".\n");
-}*/
+	vote_i = FAUX;
+
+	while (!vote_i)
+	{
+		char text[55];
+		sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, 0 + 1);
+		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
+
+		if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
+		{
+			tabCupidon[0] = caseJoueur;
+			afficherTableau2(tabCupidon, 2);
+			vote_i = VRAI;
+		}
+	}
+
+	vote_i = FAUX;
+
+	while (!vote_i)
+	{
+		char text[55];
+		sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, 1 + 1);
+		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
+
+		if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
+		{
+			tabCupidon[1] = caseJoueur;
+			afficherTableau2(tabCupidon, 2);
+			vote_i = VRAI;
+		}
+	}
+}
