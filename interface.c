@@ -714,7 +714,7 @@ void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
     exit(0);
 }
 
-unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const char* message, float textAlignement)
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const unsigned char* message, float textAlignement)
 {
     int width, height;
     input->nombreDimageDansUnEtat = 0;
@@ -906,7 +906,7 @@ void detruire_GUI(GUI* input)
     glDeleteVertexArrays(1, &input->carre);
 }
 
-Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTuée){
+Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTue){
     do
     {
         int width, height;
@@ -915,12 +915,24 @@ Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueur
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
 
-        if(joueurTuée < 0)
+        if(joueurTue < 0)
             afficherDuTexte(&input->texte, "que voulez faire ?", width * .5 - height * .18, height * .95, height * .05);
         else {
             char buffer[50];
-            sprintf_s(buffer, 50, "le Joueur %d a ete tue, que voulez-vous faire ?", joueurTuée);
-            afficherDuTexte(&input->texte, buffer, width * .5 - height * .45, height * .95, height * .05);
+            unsigned char text[50];
+            sprintf_s(buffer, 50, "le Joueur %d a ete tue, que voulez-vous faire ?", joueurTue);
+
+            for (size_t i = 0; i < 50; i++)
+            {
+                text[i] = buffer[i];
+            }
+
+            int offset = (joueurTue > 10) ? 1 : 0;
+            text[14 + offset] = 233;
+            text[16 + offset] = 233;
+            text[20 + offset] = 233;
+
+            afficherDuTexte(&input->texte, text, width * .5 - height * .45, height * .95, height * .05);
         }
 
 
@@ -1032,13 +1044,15 @@ Role choisirUneCarte(GUI* input, Role* roles) {
 
         updateCamera3D(&input->cam, input->deco.shader);
 
-        (&input->deco.carteLoupGarou + *roles)->position = make_vec4(2.5,cos(glfwGetTime()) * .2,0,1);
+        (&input->deco.carteLoupGarou + roles[0])->position = make_vec4(2.5,cos(glfwGetTime()) * .2,0,1);
+        (&input->deco.carteLoupGarou + roles[0])->angle = 0;
 
-        afficherCarte((&input->deco.carteLoupGarou + *roles), input->deco.shader);
+        afficherCarte((&input->deco.carteLoupGarou + roles[0]), input->deco.shader);
 
-        (&input->deco.carteLoupGarou + *roles + 1)->position = make_vec4(-2.5, sin(glfwGetTime()) * .2, 0, 1);
+        (&input->deco.carteLoupGarou + roles[1])->position = make_vec4(-2.5, sin(glfwGetTime()) * .2, 0, 1);
+        (&input->deco.carteLoupGarou + roles[1])->angle = 0;
 
-        afficherCarte((&input->deco.carteLoupGarou + *roles + 1), input->deco.shader);
+        afficherCarte((&input->deco.carteLoupGarou + roles[1]), input->deco.shader);
 
         updateCamera2D(&input->cam, input->shader);
 

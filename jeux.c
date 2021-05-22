@@ -147,6 +147,7 @@ int voteCapitaine(GUI* input) {
 	}
 	joueurElu = caseAyantLePLusDeVote;
 
+	//si egalite le capitaine est choisi aleatoirement
 	if (egalite_i)
 	{
 		afficherMessage(input, "il y une egalite, Le capitaine va etre choisi aleatoirement", .55);
@@ -202,6 +203,10 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 				if (tabRoles[caseJoueur] != -1 && caseJoueur <= nbrDeJoueurs)
 				{
 					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
+					if (caseCapitaine == i)
+					{
+						tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
+					}
 					//afficherTableau(tabVote, nbrDeJoueurs);
 					vote_i = VRAI;
 				}
@@ -280,6 +285,10 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	//bool
 	bool egalite_i = FAUX; // _i = ?
 	bool vote_i = FAUX; // _i = ?
+
+	//Annonce du reveille
+	afficherMessage(input, "Les loupgarous se reveille", .3);
+
 	//creation Tableau joueur en vie
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -290,6 +299,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 		}
 	}
 	afficherTableau2(tabJoueurEnVie, nbrDeJoueursEnVie);
+
 
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -317,32 +327,10 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 		}
 	}
 
-	for (i = 0; i < nbrDeJoueurs; i++)
-	{
-		if (tabRoles[i] = ROLE_LOUP_GAROU)
-		{
-			vote_i = FAUX;
-			while (!vote_i)
-			{
-				char text[68];
-				sprintf_s(text, 68, "Le Joueur %d doit voter pour le joueur qu'il souhaite voir elimine.", i + 1);
-				caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .45) - 1;
-				if (tabRoles[caseJoueur] != -1 && caseJoueur < nbrDeJoueurs && tabRoles[caseJoueur] != ROLE_LOUP_GAROU)
-				{
-					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-					vote_i = VRAI;
-				}
-				else
-				{
-					printf("Vous devez saisir un joueur ennemie encore en vie.\n");
-				}
-			}
-		}
-	}
-
 	// Recherche du joueur le plus voté
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
+	initTabShort(tabEgalite, 18, 20);
 	for (i = 1; i < nbrDeJoueurs; i++)
 	{
 		if (tabVote[i] > tabVote[caseAyantLePLusDeVote])
@@ -372,7 +360,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	}
 	joueurVote = caseAyantLePLusDeVote;
 	
-
+	//Si egalite la victime est choisi aleatoirment parmis les joueurs les plus votés
 	if (egalite_i == VRAI)
 	{
 		printf("Des joueurs ont le meme nombres de vote. Le joueur elimine va etre defini de maniere aleatoire.\n");
@@ -394,6 +382,9 @@ void fVoyante(GUI* input, Role* tabRoles) {
 	//permet de stocker si on est déjà trouvé la voyante dans le tableau des roles
 	bool trouverLaSorciere = false;
 
+	//Annonce du reveille
+	afficherMessage(input, "La voyante se reveille", .3);
+	
 	//parcours le tableau des roles
 	for (unsigned short i = 0; i < input->nombreDeJoueur; i++)
 	{
@@ -421,6 +412,8 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
 	char text[57];
 	unsigned short buf;
+
+	afficherMessage(input, "Cupidon se reveille", .3);
 
 	//Recherche de cupidon
 	while (tabRoles[caseCupidon - 1] == ROLE_CUPIDON) caseCupidon++;
@@ -457,7 +450,7 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 
 	if (!nbrLoupGarou) return;
 
-	char buffer[200] = {0};
+	char buffer[200] = { 0 };
 
 	sprintf_s(buffer, 200, "les loups garous sont les Joueurs : %d", loups[0]);
 
@@ -465,13 +458,11 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 	for (size_t i = 1; i < nbrLoupGarou; i++)
 	{
 		size_t offset = 37 + ((i - 1) * 3);
-		sprintf_s(buffer + offset , 200 - offset, ", %d", loups[i]);
+		sprintf_s(buffer + offset, 200 - offset, ", %d", loups[i]);
 	}
 
 	afficherMessage(input, buffer, .5);
 }
-<<<<<<< Updated upstream
-=======
 
 void fVoleur(GUI* input, Role* tabRoles)
 {
@@ -549,4 +540,4 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 	}
 	return false;
 }
->>>>>>> Stashed changes
+
