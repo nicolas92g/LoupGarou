@@ -432,52 +432,32 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 	tabCupidon[1] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur - 1, text, .5);
 }
 
-void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) {
-	unsigned char text[28] = "la petite fille se reveille";
-	text[20] = 233;
-	afficherMessage(input, text, .3);
-
-	unsigned short nbrLoupGarou = 0;
-	unsigned short loups[4];
-	for (unsigned short i = 0; i < nbrDeJoueursEnVie; i++)
-	{
-		if (tabRoles[i] == ROLE_LOUP_GAROU) {
-			loups[nbrLoupGarou] = i + 1;
-			nbrLoupGarou++;
-		}
-		assert(nbrLoupGarou < 5);
-	}
-
-	if (!nbrLoupGarou) return;
-
-	char buffer[200] = { 0 };
-
-	sprintf_s(buffer, 200, "les loups garous sont les Joueurs : %d", loups[0]);
-
-	printf("%d", nbrLoupGarou);
-	for (size_t i = 1; i < nbrLoupGarou; i++)
-	{
-		size_t offset = 37 + ((i - 1) * 3);
-		sprintf_s(buffer + offset, 200 - offset, ", %d", loups[i]);
-	}
-
-	afficherMessage(input, buffer, .5);
-}
-
 void fVoleur(GUI* input, Role* tabRoles)
 {
 	unsigned short i;
 	unsigned short j;
 	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
+	unsigned short numeroJoueur = 0;
 	unsigned short caseTabVoleur = 0;
+	unsigned short nAlea;
+	unsigned short flecheTabVoleur;
+	unsigned short roleChoisi = 0;
 	//tab
 	unsigned short tabVoleur[19];
+	Role tabVoleurChoix[2];
 	//bool
 	bool attribue;
-	
+	//ALea
+	time_t t;
+	srand((unsigned)time(&t));
+	//Init Tab
 	initTabShort(tabVoleur, 19, ROLE_VILLAGEOIS);
-	afficherTableau2(tabVoleur, 19);
-
+	//on cherche qui est le voleur
+	while (tabRoles[numeroJoueur] != ROLE_VOLEUR)
+	{
+		numeroJoueur += 1;
+	}
+	
 	//Remplissage de tab Voleur avec les roles non attribues
 	tabVoleur[0] = ROLE_LOUP_GAROU;
 	caseTabVoleur = 1;
@@ -503,6 +483,24 @@ void fVoleur(GUI* input, Role* tabRoles)
 			caseTabVoleur += 1;
 		}
 	}
+	afficherTableau2(tabVoleur, 19);
+
+	//choix aleatoire des deux roles
+	flecheTabVoleur = 19 - nbrDeJoueurs;
+	
+	nAlea = rand() % flecheTabVoleur;
+	tabVoleurChoix[0] = tabVoleur[nAlea];
+	echangeCase(tabVoleur, nAlea, 18);
+
+	flecheTabVoleur -= 1;
+	nAlea = rand() % flecheTabVoleur;
+	tabVoleurChoix[1] = tabVoleur[nAlea];
+
+	//afficherTableau(tabVoleurChoix, 2);
+
+	roleChoisi = choisirUneCarte(input, tabVoleurChoix);
+
+	tabRoles[numeroJoueur] = roleChoisi;
 }
 
 bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie, unsigned short* joueursTueParLaSorciere)
@@ -515,7 +513,21 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 	//bool
 	bool vote_i = FAUX;
 
+	unsigned char text[38];
+	char text2[38];
+	sprintf_s(text2, 38, "Le Joueur %d a ete tuee par les loups", joueurTuee);
+	for (i = 0; i < 38; i++)
+	{
+		text[i] = text2[i];
+		if (i = 22)
+		{
+			text[i] = 233;
+		}
+	}
+	
+	afficherMessage(input, text, .3);
 	action = ActionsSorciere(input, peutTuer, peutSauver, joueurTuee);
+
 
 	//Action de tuer
 	if (action == SORCIERE_TUER)
@@ -535,6 +547,11 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 
 		*joueursTueParLaSorciere = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueurEnVie, text, .37);
 	}
+
+
+
+
+
 	else if (action == SORCIERE_SAUVER) {
 		return true;
 	}

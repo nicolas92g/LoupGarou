@@ -26,17 +26,19 @@ int main() {
     //verifie l'allocation dynamique
     assert(roles);
 
-    
-    fPetiteFille(&input, roles, input.nombreDeJoueur);
 
-    unsigned short amoureux[2];
-    fCupidon(&input, roles, amoureux);
+   // unsigned short amoureux[2];
+   //fCupidon(&input, roles, amoureux);
+
+    roles[0] = ROLE_VOLEUR;
 
     montrerLeRoleDeChaqueJoueurs(&input, roles);
 
-    caseCapitaine = voteCapitaine(&input);
+    fVoleur(&input, roles);
+
+    //caseCapitaine = voteCapitaine(&input);
     
-    caseJoueurELimine = voteFinDeTour(&input, roles, input.nombreDeJoueur, caseCapitaine);
+    //caseJoueurELimine = voteFinDeTour(&input, roles, input.nombreDeJoueur, caseCapitaine);
 
     //finir le programme
     free(roles);
