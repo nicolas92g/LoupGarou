@@ -149,11 +149,14 @@ int voteCapitaine(GUI* input) {
 
 	if (egalite_i)
 	{
-		printf("Des joueurs ont le meme nombres de vote. Le capitaine va etre defini de maniere aleatoire.\n");
+		afficherMessage(input, "il y une egalite, Le capitaine va etre choisi aleatoirement", .55);
 		joueurElu = tabEgalite[rand() % (nCaseAyantLeMemeNombreDeVote + 1)];
 	}
 
-	printf("Le joueur %d est elu capitaine.\n", joueurElu + 1);
+	char buffer[31];
+	sprintf_s(buffer, 31, "Le Joueur %d est elu capitaine", joueurElu + 1);
+	afficherMessage(input, buffer, .3);
+
 	return joueurElu;
 }
 
@@ -199,7 +202,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 				if (tabRoles[caseJoueur] != -1 && caseJoueur <= nbrDeJoueurs)
 				{
 					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-					afficherTableau(tabVote, nbrDeJoueurs);
+					//afficherTableau(tabVote, nbrDeJoueurs);
 					vote_i = VRAI;
 				}
 			}
@@ -234,7 +237,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		afficherTableau2(tabEgalite, 18);
+		//afficherTableau2(tabEgalite, 18);
 	}
 	joueurElimine = caseAyantLePLusDeVote;
 

@@ -978,6 +978,7 @@ void afficherMessage(GUI* input, const char* message, float textAligment){
     Boutton ok = make_Boutton(1, 1,1, 1, chargerUneTexture(PROJECT_PATH"textures/blanc.png"), input->fenetre);
     ok.filtreHover = true;
     ok.alpha = .2;
+    input->nombreDimageDansUnEtat = 0;
 
     do
     {
@@ -1002,9 +1003,11 @@ void afficherMessage(GUI* input, const char* message, float textAligment){
 
         afficherDuTexte(&input->texte, "OK", width * .5 - height * .03, height * 0.485, height * .05);
 
+        if (ok.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) return;
+
         glfwPollEvents();
         glfwSwapBuffers(input->fenetre);
-
+        input->nombreDimageDansUnEtat++;
     } while (!glfwWindowShouldClose(input->fenetre));
     exit(0);
 }
