@@ -15,5 +15,6 @@ int* initTab2(int tab[], int taille, int a);
 void afficherTableau(int tab[], int taille);
 void afficherTableau2(unsigned short tab[], int taille);
 void echangeCase(int tab[], int a, int b);
+void echangeCase2(unsigned short tab[], int a, int b);
 int* copieTab(int tabA[], int tabB[], int taille);
 int voteSolo(int tabJoueur[], int nJoueur);

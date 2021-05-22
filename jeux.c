@@ -444,7 +444,7 @@ void fVoleur(GUI* input, Role* tabRoles)
 	unsigned short roleChoisi = 0;
 	//tab
 	unsigned short tabVoleur[19];
-	Role tabVoleurChoix[2];
+	Role tabVoleurChoix[2] = {0,1};
 	//bool
 	bool attribue;
 	//ALea
@@ -490,13 +490,13 @@ void fVoleur(GUI* input, Role* tabRoles)
 	
 	nAlea = rand() % flecheTabVoleur;
 	tabVoleurChoix[0] = tabVoleur[nAlea];
-	echangeCase(tabVoleur, nAlea, 18);
+	echangeCase2(tabVoleur, nAlea, 18);
 
 	flecheTabVoleur -= 1;
 	nAlea = rand() % flecheTabVoleur;
 	tabVoleurChoix[1] = tabVoleur[nAlea];
 
-	//afficherTableau(tabVoleurChoix, 2);
+	afficherTableau(tabVoleurChoix, 2);
 
 	roleChoisi = choisirUneCarte(input, tabVoleurChoix);
 
@@ -510,24 +510,8 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 	Actions action;
 	//tab
 	unsigned short tabJoueurEnVie[18];
-	//bool
-	bool vote_i = FAUX;
 
-	unsigned char text[38];
-	char text2[38];
-	sprintf_s(text2, 38, "Le Joueur %d a ete tuee par les loups", joueurTuee);
-	for (i = 0; i < 38; i++)
-	{
-		text[i] = text2[i];
-		if (i = 22)
-		{
-			text[i] = 233;
-		}
-	}
-	
-	afficherMessage(input, text, .3);
 	action = ActionsSorciere(input, peutTuer, peutSauver, joueurTuee);
-
 
 	//Action de tuer
 	if (action == SORCIERE_TUER)
@@ -545,13 +529,8 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 		unsigned char text[48] = "La sorciere doit eliminer un Joueur";
 		text[17] = 233;
 
-		*joueursTueParLaSorciere = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueurEnVie, text, .37);
+		*joueursTueParLaSorciere = choisirUnJoueur(input, tabJoueurEnVie, j, text, .37);
 	}
-
-
-
-
-
 	else if (action == SORCIERE_SAUVER) {
 		return true;
 	}

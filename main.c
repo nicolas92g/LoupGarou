@@ -19,20 +19,17 @@ int main() {
 
     attribution(roles, input.nombreDeJoueur);
 
-    unsigned short ptr[2];
-    fSorciere(&input, roles, true, true, 1, input.nombreDeJoueur, ptr);
-    printf("a tuer : %d", *ptr);
+    unsigned short ptr;
+    //fSorciere(&input, roles, true, true, 12, input.nombreDeJoueur, &ptr);
 
     //verifie l'allocation dynamique
     assert(roles);
 
 
-   // unsigned short amoureux[2];
-   //fCupidon(&input, roles, amoureux);
+    // unsigned short amoureux[2];
+    //fCupidon(&input, roles, amoureux);
 
-    roles[0] = ROLE_VOLEUR;
-
-    montrerLeRoleDeChaqueJoueurs(&input, roles);
+    //montrerLeRoleDeChaqueJoueurs(&input, roles);
 
     fVoleur(&input, roles);
 

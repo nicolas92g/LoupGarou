@@ -57,6 +57,13 @@ void echangeCase(int tab[], int a, int b)
 	tab[b] = trans;
 }
 
+void echangeCase2(unsigned short tab[], int a, int b)
+{
+	unsigned short trans = tab[a];
+	tab[a] = tab[b];
+	tab[b] = trans;
+}
+
 int* copieTab(int tabA[], int tabB[], int taille)
 {
 	int i;
