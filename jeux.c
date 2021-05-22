@@ -287,7 +287,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	bool vote_i = FAUX; // _i = ?
 
 	//Annonce du reveille
-	afficherMessage(input, "Les loupgarous se reveille", .3);
+	afficherMessage(input, "Les loup garous se reveille", .3);
 
 	//creation Tableau joueur en vie
 	for (i = 0; i < nbrDeJoueurs; i++)
@@ -298,8 +298,6 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 			j += 1;
 		}
 	}
-	afficherTableau2(tabJoueurEnVie, nbrDeJoueursEnVie);
-
 
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -314,12 +312,10 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 					char text[49];
 					sprintf_s(text, 49, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);
 					caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
-					printf("TEST");
 
 					if (tabRoles[caseJoueur] != -1 && tabRoles[caseJoueur] != ROLE_LOUP_GAROU && caseJoueur <= nbrDeJoueurs)
 					{
 						tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-						afficherTableau(tabVote, nbrDeJoueurs);
 						vote_i = VRAI;
 					}
 				}
@@ -356,20 +352,19 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		afficherTableau2(tabEgalite, 18);
 	}
 	joueurVote = caseAyantLePLusDeVote;
 	
 	//Si egalite la victime est choisi aleatoirment parmis les joueurs les plus votés
 	if (egalite_i == VRAI)
 	{
-		printf("Des joueurs ont le meme nombres de vote. Le joueur elimine va etre defini de maniere aleatoire.\n");
 		joueurVote = tabEgalite[rand() % (nCaseAyantLeMemeNombreDeVote + 1)];
 	}
 
-	printf("Vous avez eliminez le joueur: %d.\n", joueurVote);
-	tabRoles[joueurVote] = -1;
-	return joueurVote;
+	char text[35];
+	sprintf_s(text, 35, "Vous avez eliminez le Joueur: %d", joueurVote + 1);
+	afficherMessage(input, text, .3);
+	return joueurVote + 1;
 }
 
 void fVoyante(GUI* input, Role* tabRoles) {
@@ -378,28 +373,23 @@ void fVoyante(GUI* input, Role* tabRoles) {
 	
 	//verifie l'allocation dynamique
 	assert(joueursAVoir);
-	
-	//permet de stocker si on est déjà trouvé la voyante dans le tableau des roles
-	bool trouverLaSorciere = false;
 
 	//Annonce du reveille
-	afficherMessage(input, "La voyante se reveille", .3);
+	afficherMessage(input, "La voyante se reveille", .2);
+
+	int j = 0;
 	
 	//parcours le tableau des roles
 	for (unsigned short i = 0; i < input->nombreDeJoueur; i++)
 	{
-		if (tabRoles[i] == ROLE_VOYANTE) {
-			trouverLaSorciere = true;
-			continue;
-		}
-		if (!trouverLaSorciere && i < input->nombreDeJoueur - 1)
-			joueursAVoir[i] = (unsigned short)(i + 1);
-		else
-			joueursAVoir[i - 1] = (unsigned short)(i + 1);
+		if (tabRoles[i] != ROLE_VOYANTE && tabRoles[i] != ROLE_MORT) {
+			joueursAVoir[j] = (unsigned short)(i + 1);
+			j++;
+		}	
 	}
 
 	//la yoyante choisit un joueurs
-	unsigned short joueurAVoir = choisirUnJoueur(input, joueursAVoir, input->nombreDeJoueur - 1, "la voyante choisit un joueur a demasquer", .4);
+	unsigned short joueurAVoir = choisirUnJoueur(input, joueursAVoir, input->nombreDeJoueur - 1, "la voyante choisit un Joueur a demasquer", .4);
 
 	montrerLeRoleDuJoueur(input, tabRoles[joueurAVoir - 1], joueurAVoir);
 
@@ -413,13 +403,13 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 	char text[57];
 	unsigned short buf;
 
-	afficherMessage(input, "Cupidon se reveille", .3);
+	afficherMessage(input, "Cupidon se reveille", .2);
 
 	//Recherche de cupidon
 	while (tabRoles[caseCupidon - 1] == ROLE_CUPIDON) caseCupidon++;
 
 	//demande le premier joueur du couple
-	sprintf_s(text, 56, "Cupidon, Joueur %d doit choisir le 1er Joueur du couple", caseCupidon);
+	sprintf_s(text, 56, "Cupidon, Joueur %d, doit choisir le 1er Joueur du couple", caseCupidon);
 	tabCupidon[0] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur, text, .5);
 
 	//enleve ce joueur du tableau
@@ -428,8 +418,39 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 	tabJoueur[input->nombreDeJoueur - 1] = buf;
 
 	//demande le 2eme joueur du couple
-	sprintf_s(text, 57, "Cupidon, Joueur %d doit choisir le 2eme Joueur du couple", caseCupidon);
+	sprintf_s(text, 57, "Cupidon, Joueur %d, doit choisir le 2eme Joueur du couple", caseCupidon);
 	tabCupidon[1] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur - 1, text, .5);
+}
+
+void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) {
+	unsigned char text[28] = "la petite fille se reveille";
+	text[20] = 233;
+	afficherMessage(input, text, .3);
+
+	unsigned short nbrLoupGarou = 0;
+	unsigned short loups[4];
+	for (unsigned short i = 0; i < nbrDeJoueursEnVie; i++)
+	{
+		if (tabRoles[i] == ROLE_LOUP_GAROU) {
+			loups[nbrLoupGarou] = i + 1;
+			nbrLoupGarou++;
+		}
+		assert(nbrLoupGarou < 5);
+	}
+
+	if (!nbrLoupGarou) return;
+
+	char buffer[200] = { 0 };
+
+	sprintf_s(buffer, 200, "les loups garous sont les Joueurs : %d", loups[0]);
+
+	for (size_t i = 1; i < nbrLoupGarou; i++)
+	{
+		size_t offset = 37 + ((i - 1) * 3);
+		sprintf_s(buffer + offset, 200 - offset, ", %d", loups[i]);
+	}
+
+	afficherMessage(input, buffer, .5);
 }
 
 void fVoleur(GUI* input, Role* tabRoles)
@@ -483,7 +504,6 @@ void fVoleur(GUI* input, Role* tabRoles)
 			caseTabVoleur += 1;
 		}
 	}
-	afficherTableau2(tabVoleur, 19);
 
 	//choix aleatoire des deux roles
 	flecheTabVoleur = 19 - nbrDeJoueurs;
@@ -496,14 +516,12 @@ void fVoleur(GUI* input, Role* tabRoles)
 	nAlea = rand() % flecheTabVoleur;
 	tabVoleurChoix[1] = tabVoleur[nAlea];
 
-	afficherTableau(tabVoleurChoix, 2);
-
 	roleChoisi = choisirUneCarte(input, tabVoleurChoix);
 
 	tabRoles[numeroJoueur] = roleChoisi;
 }
 
-bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie, unsigned short* joueursTueParLaSorciere)
+bool fSorciere(GUI* input, Role* tabRoles, bool* peutTuer, bool* peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie, unsigned short* joueursTueParLaSorciere)
 {
 	unsigned short i;
 	unsigned short j = 0;
@@ -511,11 +529,14 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 	//tab
 	unsigned short tabJoueurEnVie[18];
 
-	action = ActionsSorciere(input, peutTuer, peutSauver, joueurTuee);
+	afficherMessage(input, "la sorciere se reveille", .3);
+
+	action = ActionsSorciere(input, *peutTuer, *peutSauver, joueurTuee);
 
 	//Action de tuer
 	if (action == SORCIERE_TUER)
 	{
+		*peutTuer = false;
 		//creation Tableau joueur en vie
 		for (i = 0; i < input->nombreDeJoueur; i++)
 		{
@@ -532,18 +553,19 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 		*joueursTueParLaSorciere = choisirUnJoueur(input, tabJoueurEnVie, j, text, .37);
 	}
 	else if (action == SORCIERE_SAUVER) {
+		*peutSauver = false;
 		return true;
 	}
 	return false;
 }
 
-int fChasseur(GUI* input, Role* tabRoles, unsigned short joueursEnVie) {
+int fChasseur(GUI* input, Role* tabRoles) {
 	unsigned short joueursATuer[17];
 	int j = 0;
 
-	for (size_t i = 0; i < joueursEnVie; i++)
+	for (size_t i = 0; i < input->nombreDeJoueur; i++)
 	{
-		if (tabRoles[i] != ROLE_CHASSEUR) {
+		if (tabRoles[i] != ROLE_CHASSEUR && tabRoles[i] != ROLE_MORT) {
 			joueursATuer[j] = i + 1;
 			j++;
 		}
@@ -554,17 +576,185 @@ int fChasseur(GUI* input, Role* tabRoles, unsigned short joueursEnVie) {
 	return choisirUnJoueur(input, joueursATuer, j, text, .6);
 }
 
-bool LeRoleExiste() {
-	return true;
+unsigned short LeRoleExiste(Role* roles, unsigned short size,  Role role) {
+	for (unsigned short i = 0; i < size; i++)
+	{
+		if (roles[i] == role) return i;
+	}
+	return 20;
+}
+
+bool partieEstFinie(Role* rolesEnVies, unsigned short nbrDeJoueursEnVie) {
+	bool IlnyAQueDesLoups = true;
+	for (unsigned short i = 0; i < nbrDeJoueursEnVie; i++)
+	{
+		if (rolesEnVies[i] != ROLE_LOUP_GAROU && rolesEnVies[i] != ROLE_MORT) {
+			IlnyAQueDesLoups = false;
+			break;
+		}
+	}
+	return (LeRoleExiste(rolesEnVies, nbrDeJoueursEnVie, ROLE_LOUP_GAROU) == 20 || IlnyAQueDesLoups);
+}
+
+void tuerJoueur(unsigned short joueurATuer, Role* roles, unsigned short* couple, 
+	unsigned short joueursTue[], unsigned short* nbrJoueursTue) {
+	
+	roles[joueurATuer - 1] = ROLE_MORT;
+
+	joueursTue[*nbrJoueursTue] = joueurATuer;
+	(*nbrJoueursTue)++;
+	
+
+	if (joueurATuer == couple[0]) {
+		roles[couple[1] - 1] = ROLE_MORT;
+
+		joueursTue[*nbrJoueursTue] = couple[1];
+		(*nbrJoueursTue)++;
+	}
+	else if (joueurATuer == couple[1]) {
+		roles[couple[0] - 1] = ROLE_MORT;
+
+		joueursTue[*nbrJoueursTue] = couple[0];
+		(*nbrJoueursTue)++;
+	}
 }
 
 void deroulementDeLaPartie(GUI* input, Role* roles){
 	bool SorcierePotionTuer = true;
 	bool SorcierePotionSauver = true;
+
+	roles[0] = ROLE_CHASSEUR;
+	roles[1] = ROLE_VOLEUR;
+	roles[2] = ROLE_VILLAGEOIS;
+	roles[3] = ROLE_VOYANTE;
+	roles[4] = ROLE_LOUP_GAROU;
+	roles[5] = ROLE_LOUP_GAROU;
+	roles[6] = ROLE_SORCIERE;
+	roles[7] = ROLE_CUPIDON;
+
+	input->nombreDeJoueur = 8;
+
 	Role* rolesEnVie = (Role*)malloc(sizeof(Role) * input->nombreDeJoueur);
+	assert(rolesEnVie);
+	for (size_t i = 0; i < input->nombreDeJoueur; i++) rolesEnVie[i] = roles[i];
+
+	unsigned short nbrDeJoueursEnVie = input->nombreDeJoueur;
+	unsigned short couple[2] = {0};
+	unsigned short capitaine = 20;
+
+
 	montrerLeRoleDeChaqueJoueurs(input, roles);
-
 	afficherMessage(input, "le village s endort !", .17f);
+	//election capitaine
+	capitaine = voteCapitaine(input) + 1;
 
+	//appelle le voleur en debut de partie
+	unsigned short posVoleur = LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_VOLEUR);
+	if (posVoleur != 20) {
+		fVoleur(input, rolesEnVie);
+		roles[posVoleur] = rolesEnVie[posVoleur];
+	}
+		
+	//appelle cupidon en début de partie
+	if (LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_CUPIDON) != 20) {
+		fCupidon(input, rolesEnVie, couple);
 
+		char text[100];
+		sprintf_s(text, 100, "les amoureux sont les Joueurs %d et %d", couple[0], couple[1]);
+		afficherMessage(input, text, .4);
+	}
+
+	//boucle de jeu
+	do{
+		unsigned short nbrJoueursTue = 0;
+		unsigned short joueursTue[4] = { 0 };
+
+		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_VOYANTE) != 20) {
+			fVoyante(input, rolesEnVie);
+		}
+
+		unsigned short joueursTueParLaSorciere = 20;
+		unsigned short joueursTueParLesLoups = fLoupgarou(input, rolesEnVie, nbrDeJoueursEnVie);
+		tuerJoueur(joueursTueParLesLoups, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+
+		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_PETITE_FILLE) != 20)
+			fPetiteFille(input, rolesEnVie, input->nombreDeJoueur);
+		
+		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_SORCIERE) != 20 && (SorcierePotionTuer || SorcierePotionSauver)) {
+			if (fSorciere(input, rolesEnVie, &SorcierePotionSauver, &SorcierePotionTuer, joueursTueParLesLoups, nbrDeJoueursEnVie, &joueursTueParLaSorciere)) {
+				for (size_t i = 0; i < nbrJoueursTue; i++)
+				{
+					rolesEnVie[joueursTue[i] - 1] = roles[joueursTue[i] - 1];
+				}
+				nbrJoueursTue = 0;
+			}
+			else {
+				if (joueursTueParLaSorciere != 20) {
+					tuerJoueur(joueursTueParLaSorciere, rolesEnVie,couple, joueursTue, &nbrJoueursTue);
+				}				
+			}
+		}
+			
+
+		nbrDeJoueursEnVie -= nbrJoueursTue;
+
+		if (nbrJoueursTue > 0) {
+			for (size_t i = 0; i < nbrJoueursTue; i++)
+			{
+				if (roles[joueursTue[i] - 1] == ROLE_CHASSEUR) {
+					tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+				}
+				if (joueursTue[i] == capitaine) {
+
+					unsigned short joueursEnVie[17] = { 0 };
+					int j = 0;
+					for (size_t i = 0; i < input->nombreDeJoueur; i++)
+					{
+						if (rolesEnVie[i] != ROLE_MORT) {
+							joueursEnVie[j] = i + 1;
+							j++;
+						}
+					}
+
+					choisirUnJoueur(input, joueursEnVie, j, "le capitaine est mort, il doit en choisir un nouveau", .55);
+				}
+			}
+
+			char text[100];
+			sprintf_s(text, 100, "les Joueurs morts sont : %d", joueursTue[0]);
+
+			for (size_t i = 1; i < nbrJoueursTue; i++)
+			{
+				size_t offset = 26 + (i - 1) * 4;
+				sprintf_s(text + offset , 100 - offset, ", %d ", joueursTue[i]);
+			}
+
+			afficherMessage(input, text, .35);
+		}
+		else afficherMessage(input, "il n'y a eu aucun mort cette nuit", .4);
+
+		unsigned short joueurVote = voteFinDeTour(input, rolesEnVie, nbrDeJoueursEnVie, capitaine);
+		tuerJoueur(joueurVote, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+
+		if (roles[joueurVote - 1] == ROLE_CHASSEUR) {
+			tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+		}
+		if (joueursTue == capitaine) {
+			unsigned short joueursEnVie[17] = { 0 };
+			int j = 0;
+			for (size_t i = 0; i < input->nombreDeJoueur; i++)
+			{
+				if (rolesEnVie[i] != ROLE_MORT) {
+					joueursEnVie[j] = i + 1;
+					j++;
+				}
+			}
+
+			choisirUnJoueur(input, joueursEnVie, j, "le capitaine est mort, il doit en choisir un nouveau", .55);
+		}
+
+		
+	} while (!partieEstFinie(rolesEnVie, input->nombreDeJoueur));
+	
+	free(rolesEnVie);
 }

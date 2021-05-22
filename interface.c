@@ -676,6 +676,8 @@ void montrerLeRoleDeChaqueJoueurs(GUI* input, Role* roles) {
 }
 
 void montrerLeRoleDuJoueur(GUI* input, Role role, unsigned short joueur) {
+    input->nombreDimageDansUnEtat = 0;
+    carteQuiSeDevoile(&input->deco, -1);
     do {
 
         int width, height;
@@ -741,6 +743,8 @@ unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsig
         {
             //si i est un multiple de 3 non nul alors sauter une ligne
             if (!(i % 5) && i) lignes++;
+
+            if (listeDeJoueurs[i] < 1 || listeDeJoueurs[i] > 18) continue;
 
             //position et taille de chaque bouttons;
             input->bouttons[listeDeJoueurs[i] - 1].x = i % 5 * height * .21f + (width * .5f - height * .42f);
@@ -907,6 +911,7 @@ void detruire_GUI(GUI* input)
 }
 
 Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTue){
+    input->nombreDimageDansUnEtat = 0;
     do
     {
         int width, height;
