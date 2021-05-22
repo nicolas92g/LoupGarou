@@ -12,18 +12,20 @@ int main() {
     //creer l'interface graphique
     GUI input = make_GUI(fenetre);
 
-   // Role ro[2] = { 0, 3 };
-    //printf("role : %d\n",choisirUneCarte(&input, ro));
 
     //recupere le nbr de joueurs et alloue un tableau de cette taille
     recupererLeNombreDeJoueurs(&input);
     Role* roles = (Role*)calloc(input.nombreDeJoueur, sizeof(Role));
 
+    attribution(roles, input.nombreDeJoueur);
+
+    unsigned short ptr[2];
+    fSorciere(&input, roles, true, true, 1, input.nombreDeJoueur, ptr);
+    printf("a tuer : %d", *ptr);
+
     //verifie l'allocation dynamique
     assert(roles);
 
-    attribution(roles, input.nombreDeJoueur);
-    //fPetiteFille(&input, roles, input.nombreDeJoueur);
 
    // unsigned short amoureux[2];
    //fCupidon(&input, roles, amoureux);
