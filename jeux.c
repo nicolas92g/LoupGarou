@@ -450,7 +450,7 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 
 	if (!nbrLoupGarou) return;
 
-	char buffer[200] = {0};
+	char buffer[200] = { 0 };
 
 	sprintf_s(buffer, 200, "les loups garous sont les Joueurs : %d", loups[0]);
 
@@ -458,10 +458,11 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 	for (size_t i = 1; i < nbrLoupGarou; i++)
 	{
 		size_t offset = 37 + ((i - 1) * 3);
-		sprintf_s(buffer + offset , 200 - offset, ", %d", loups[i]);
+		sprintf_s(buffer + offset, 200 - offset, ", %d", loups[i]);
 	}
 
 	afficherMessage(input, buffer, .5);
+}
 
 void fVoleur(GUI* input, Role* tabRoles)
 {
