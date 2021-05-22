@@ -286,7 +286,7 @@ void detruire_GUI(GUI* input);
 /**
  * @brief interface permettant de selectionner un joueur parmis une selectionée
  */
-unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const char* messageTexture, float textAlignement);
+unsigned short choisirUnJoueur(GUI* input, unsigned short* listeDeJoueurs, unsigned short nombreDeJoueurs, const unsigned char* message, float textAlignement);
 /**
  * @brief creer un afficheur de texte qui peut afficher une police donner en argument
  */
@@ -299,7 +299,7 @@ void afficherDuTexte(AfficheurDeTexte* r, const unsigned char* text, int x, int 
 /**
  * @brief permet de demander a la sorciere ce quelle veut faire
  */
-Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTué);
+Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueurTue);
 /**
  * @brief permet d'afficher un message a l'utilisateur
  */
