@@ -438,3 +438,35 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 	sprintf_s(text, 57, "Cupidon, Joueur %d doit choisir le 2eme Joueur du couple", caseCupidon);
 	tabCupidon[1] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur - 1, text, .5);
 }
+
+void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) {
+	unsigned char text[28] = "la petite fille se reveille";
+	text[20] = 233;
+	afficherMessage(input, text, .3);
+
+	unsigned short nbrLoupGarou = 0;
+	unsigned short loups[4];
+	for (unsigned short i = 0; i < nbrDeJoueursEnVie; i++)
+	{
+		if (tabRoles[i] == ROLE_LOUP_GAROU) {
+			loups[nbrLoupGarou] = i + 1;
+			nbrLoupGarou++;
+		}
+		assert(nbrLoupGarou < 5);
+	}
+
+	if (!nbrLoupGarou) return;
+
+	char buffer[200] = {0};
+
+	sprintf_s(buffer, 200, "les loups garous sont les Joueurs : %d", loups[0]);
+
+	printf("%d", nbrLoupGarou);
+	for (size_t i = 1; i < nbrLoupGarou; i++)
+	{
+		size_t offset = 37 + ((i - 1) * 3);
+		sprintf_s(buffer + offset , 200 - offset, ", %d", loups[i]);
+	}
+
+	afficherMessage(input, buffer, .5);
+}

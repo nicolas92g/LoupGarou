@@ -96,7 +96,7 @@ typedef struct Charactere {
  * @brief permet d'afficher des chaines de characteres a l'ecran
  */
 typedef struct AfficheurDeTexte {
-	Charactere tableauDeCharacteres[128];
+	Charactere tableauDeCharacteres[256];
 	unsigned int VAO;
 	unsigned int VBO;
 
@@ -295,7 +295,7 @@ AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fen
  * @brief afficher avec un afficheur de texte
  * @param scale unité arbitraire 1 = 48 px
  */
-void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float scale);
+void afficherDuTexte(AfficheurDeTexte* r, const unsigned char* text, int x, int y, float scale);
 /**
  * @brief permet de demander a la sorciere ce quelle veut faire
  */
@@ -303,5 +303,9 @@ Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueur
 /**
  * @brief permet d'afficher un message a l'utilisateur
  */
-void afficherMessage(GUI* input, const char* message, float textAligment);
+void afficherMessage(GUI* input, const unsigned char* message, float textAligment);
+/**
+ * @brief permet au voleur de choisir sa carte
+ */
+Role choisirUneCarte(GUI* input, Role* roles);
 #endif // !INTERFACE
