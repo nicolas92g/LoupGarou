@@ -85,7 +85,6 @@ int voteCapitaine(GUI* input) {
 	int joueurElu = 0;
 	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
 	bool egalite_i = FAUX; // _i = ?
-	bool vote_i = FAUX; // _i = ?
 	//tab
 	int tabEgalite[18] = { -1 };
 	int tabVote[18] = { 0 };
@@ -98,21 +97,12 @@ int voteCapitaine(GUI* input) {
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
-		vote_i = FAUX;
+		char text[42];
+		sprintf_s(text, 42, "Le Joueur %d doit voter pour un capitaine", i + 1);
+		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .45) - 1;
 
-		while (!vote_i)
-		{
-			char text[42];
-			sprintf_s(text, 42, "Le Joueur %d doit voter pour un capitaine", i + 1);
-			caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .45) - 1;
-
-			if (caseJoueur <= nbrDeJoueurs)
-			{
-				tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-				//afficherTableau(tabVote, nbrDeJoueurs);
-				vote_i = VRAI;
-			}
-		}
+		tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
+		afficherTableau(tabVote, nbrDeJoueurs);
 	}
 
 	// Recherche du joueur le plus vote
@@ -190,27 +180,18 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 	int caseJoueur = 0;
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
-		vote_i = FAUX;
-
 		if (tabRoles[i] != -1)
 		{
-			while (!vote_i)
-			{
-				char text[49];
-				sprintf_s(text, 49, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);	
-				caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
+			char text[49];
+			sprintf_s(text, 49, "Le Joueur %d doit voter pour un Joueur a elimine", i + 1);	
+			caseJoueur = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueursEnVie, text, .5) - 1;
 
-				if (tabRoles[caseJoueur] != -1 && caseJoueur <= nbrDeJoueurs)
-				{
-					tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-					if (caseCapitaine == i)
-					{
-						tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-					}
-					//afficherTableau(tabVote, nbrDeJoueurs);
-					vote_i = VRAI;
-				}
+			tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
+			if (caseCapitaine == i)
+			{
+				tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
 			}
+			afficherTableau(tabVote, nbrDeJoueurs);		
 		}
 	}
 
@@ -248,24 +229,24 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 
 	if (egalite_i)
 	{
-		vote_i = FAUX;
 		for (i = 0; i < nCaseAyantLeMemeNombreDeVote; i++)
 		{
 			tabEgalite[i] += 1;
 		}
 
-		while (!vote_i)
-		{
-			char text[48];
-			sprintf_s(text, 48, "Le capitaine, Joueur %d, doit eliminer un Joueur", i + 1);
-			joueurElimine = choisirUnJoueur(input, tabEgalite, nCaseAyantLeMemeNombreDeVote, text, .45) - 1;
+		char text[48];
+		sprintf_s(text, 48, "Le capitaine, Joueur %d, doit eliminer un Joueur", i + 1);
+		joueurElimine = choisirUnJoueur(input, tabEgalite, nCaseAyantLeMemeNombreDeVote, text, .45) - 1;
 
-			if (tabVote[joueurElimine] == tabVote[caseAyantLePLusDeVote])
-			{
-				vote_i = VRAI;
-			}
+		if (tabVote[joueurElimine] == tabVote[caseAyantLePLusDeVote])
+		{
+			vote_i = VRAI;
 		}
 	}
+
+	char buffer[25];
+	sprintf_s(buffer, 25, "Le Joueur %d est elimine", joueurElimine + 1);
+	afficherMessage(input, buffer, .3);
 	return joueurElimine;
 }
 
