@@ -535,9 +535,17 @@ int fChasseur(GUI* input, Role* tabRoles, unsigned short joueursEnVie) {
 	return choisirUnJoueur(input, joueursATuer, j, text, .6);
 }
 
+bool LeRoleExiste() {
+	return true;
+}
+
 void deroulementDeLaPartie(GUI* input, Role* roles){
 	bool SorcierePotionTuer = true;
 	bool SorcierePotionSauver = true;
 	Role* rolesEnVie = (Role*)malloc(sizeof(Role) * input->nombreDeJoueur);
+	montrerLeRoleDeChaqueJoueurs(input, roles);
+
+	afficherMessage(input, "le village s endort !", .17f);
+
 
 }
