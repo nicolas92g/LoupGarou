@@ -470,3 +470,83 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 
 	afficherMessage(input, buffer, .5);
 }
+<<<<<<< Updated upstream
+=======
+
+void fVoleur(GUI* input, Role* tabRoles)
+{
+	unsigned short i;
+	unsigned short j;
+	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
+	unsigned short caseTabVoleur = 0;
+	//tab
+	unsigned short tabVoleur[19];
+	//bool
+	bool attribue;
+	
+	initTabShort(tabVoleur, 19, ROLE_VILLAGEOIS);
+	afficherTableau2(tabVoleur, 19);
+
+	//Remplissage de tab Voleur avec les roles non attribues
+	tabVoleur[0] = ROLE_LOUP_GAROU;
+	caseTabVoleur = 1;
+	if (nbrDeJoueurs < 11)
+	{
+		tabVoleur[1] = ROLE_LOUP_GAROU;
+		caseTabVoleur += 1;
+	}
+
+	for (j = 3; j < 7; j++)
+	{
+		attribue = FAUX;
+		for (i = 0; i < nbrDeJoueurs; i++)
+		{
+			if (tabRoles[i] == j)
+			{
+				attribue = VRAI;
+			}
+		}
+		if (!attribue)
+		{
+			tabVoleur[caseTabVoleur] = j;
+			caseTabVoleur += 1;
+		}
+	}
+}
+
+bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie, unsigned short* joueursTueParLaSorciere)
+{
+	unsigned short i;
+	unsigned short j = 0;
+	Actions action;
+	//tab
+	unsigned short tabJoueurEnVie[18];
+	//bool
+	bool vote_i = FAUX;
+
+	action = ActionsSorciere(input, peutTuer, peutSauver, joueurTuee);
+
+	//Action de tuer
+	if (action == SORCIERE_TUER)
+	{
+		//creation Tableau joueur en vie
+		for (i = 0; i < input->nombreDeJoueur; i++)
+		{
+			if (tabRoles[i] != -1 && tabRoles[i] != ROLE_VOYANTE)
+			{
+				tabJoueurEnVie[j] = i + 1;
+				j++;
+			}
+		}
+
+		unsigned char text[48] = "La sorciere doit eliminer un Joueur";
+		text[17] = 233;
+
+		*joueursTueParLaSorciere = choisirUnJoueur(input, tabJoueurEnVie, nbrDeJoueurEnVie, text, .37);
+	}
+	else if (action == SORCIERE_SAUVER) {
+		return true;
+	}
+	return false;
+}
+>>>>>>> Stashed changes
