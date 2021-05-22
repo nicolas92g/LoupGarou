@@ -518,3 +518,26 @@ bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short
 	return false;
 }
 
+int fChasseur(GUI* input, Role* tabRoles, unsigned short joueursEnVie) {
+	unsigned short joueursATuer[17];
+	int j = 0;
+
+	for (size_t i = 0; i < joueursEnVie; i++)
+	{
+		if (tabRoles[i] != ROLE_CHASSEUR) {
+			joueursATuer[j] = i + 1;
+			j++;
+		}
+	}
+	unsigned char text[59] = "le Chasseur doit choisir un Joueur a tuer avant de mourrir";
+	text[35] = 224;
+
+	return choisirUnJoueur(input, joueursATuer, j, text, .6);
+}
+
+void deroulementDeLaPartie(GUI* input, Role* roles){
+	bool SorcierePotionTuer = true;
+	bool SorcierePotionSauver = true;
+	Role* rolesEnVie = (Role*)malloc(sizeof(Role) * input->nombreDeJoueur);
+
+}
