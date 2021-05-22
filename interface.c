@@ -1044,15 +1044,15 @@ Role choisirUneCarte(GUI* input, Role* roles) {
 
         updateCamera3D(&input->cam, input->deco.shader);
 
-        (&input->deco.carteLoupGarou + *roles)->position = make_vec4(2.5,cos(glfwGetTime()) * .2,0,1);
-        (&input->deco.carteLoupGarou + *roles)->angle = 0;
+        (&input->deco.carteLoupGarou + roles[0])->position = make_vec4(2.5,cos(glfwGetTime()) * .2,0,1);
+        (&input->deco.carteLoupGarou + roles[0])->angle = 0;
 
         afficherCarte((&input->deco.carteLoupGarou + roles[0]), input->deco.shader);
 
-        (&input->deco.carteLoupGarou + *roles + 1)->position = make_vec4(-2.5, sin(glfwGetTime()) * .2, 0, 1);
-        (&input->deco.carteLoupGarou + *roles + 1)->angle = 0;
+        (&input->deco.carteLoupGarou + roles[1])->position = make_vec4(-2.5, sin(glfwGetTime()) * .2, 0, 1);
+        (&input->deco.carteLoupGarou + roles[1])->angle = 0;
 
-        afficherCarte((&input->deco.carteLoupGarou + *roles + 1), input->deco.shader);
+        afficherCarte((&input->deco.carteLoupGarou + roles[1]), input->deco.shader);
 
         updateCamera2D(&input->cam, input->shader);
 
