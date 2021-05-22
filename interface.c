@@ -796,11 +796,11 @@ AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fen
     //taille d'un pixel de la police
     FT_Set_Pixel_Sizes(face, 0, TEXTE_RESOLUTION);
 
-    for (short c = 0; c < 128; c++)
+    for (short c = 0; c < 256; c++)
     {
         //charger le charactere c
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-            printf("le chargement du charactere : %c n'a pas reussie\n", c);
+            printf("le chargement du charactere : %d n'a pas reussie\n", c);
             continue;
         }
 
@@ -854,7 +854,7 @@ AfficheurDeTexte make_afficheurDeTexte(const char* policeChemin, GLFWwindow* fen
     return ret;
 }
 
-void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float scale) {
+void afficherDuTexte(AfficheurDeTexte* r, const unsigned char* text, int x, int y, float scale) {
     glUseProgram(r->shader);
     glBindVertexArray(r->VAO);
     glActiveTexture(GL_TEXTURE0);
@@ -871,6 +871,7 @@ void afficherDuTexte(AfficheurDeTexte* r, const char* text, int x, int y, float 
     for (short i = 0; i < strlen(text); i++)
     {
         const Charactere C = r->tableauDeCharacteres[text[i]];
+
         const float positionX = x + C.decalageX * scale;
         const float positionY = y - (C.hauteur - C.decalageY) * scale;
 
@@ -973,7 +974,7 @@ Actions ActionsSorciere(GUI* input, bool peutTuer, bool peutSauver, short joueur
     exit(0);
 }
 
-void afficherMessage(GUI* input, const char* message, float textAligment){
+void afficherMessage(GUI* input, const unsigned char* message, float textAligment){
 
     Boutton ok = make_Boutton(1, 1,1, 1, chargerUneTexture(PROJECT_PATH"textures/blanc.png"), input->fenetre);
     ok.filtreHover = true;
@@ -1004,6 +1005,59 @@ void afficherMessage(GUI* input, const char* message, float textAligment){
         afficherDuTexte(&input->texte, "OK", width * .5 - height * .03, height * 0.485, height * .05);
 
         if (ok.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) return;
+
+        glfwPollEvents();
+        glfwSwapBuffers(input->fenetre);
+        input->nombreDimageDansUnEtat++;
+    } while (!glfwWindowShouldClose(input->fenetre));
+    exit(0);
+}
+
+Role choisirUneCarte(GUI* input, Role* roles) {
+    Boutton bouttonDroit = make_Boutton(1,1,1,1, chargerUneTexture(PROJECT_PATH"textures/blanc.png"), input->fenetre);
+    Boutton bouttonGauche = make_Boutton(1,1,1,1, bouttonDroit.textureDefault, input->fenetre);
+    input->nombreDimageDansUnEtat = 0;
+    do
+    {
+        int width, height;
+        glfwGetWindowSize(input->fenetre, &width, &height);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glViewport(0, 0, width, height);
+
+        input->cam.position = make_vec4(0, 0, 12, 1);
+        input->cam.regard = make_vec4(0, 0, 0, 1);
+
+        afficherDuTexte(&input->texte, "choisissez une carte :", width * .5 - height * .25, height * .95, height * .05);
+
+        updateCamera3D(&input->cam, input->deco.shader);
+
+        (&input->deco.carteLoupGarou + *roles)->position = make_vec4(2.5,cos(glfwGetTime()) * .2,0,1);
+
+        afficherCarte((&input->deco.carteLoupGarou + *roles), input->deco.shader);
+
+        (&input->deco.carteLoupGarou + *roles + 1)->position = make_vec4(-2.5, sin(glfwGetTime()) * .2, 0, 1);
+
+        afficherCarte((&input->deco.carteLoupGarou + *roles + 1), input->deco.shader);
+
+        updateCamera2D(&input->cam, input->shader);
+
+        bouttonDroit.x = width * .3;
+        bouttonDroit.y = height * .5;
+        bouttonDroit.l = height * .45;
+        bouttonDroit.h = height * .45;
+        bouttonDroit.alpha = 1;
+        afficherBoutton(&bouttonDroit, input->shader);
+
+        bouttonGauche.x = width * .7;
+        bouttonGauche.y = height * .5;
+        bouttonGauche.l = height * .45;
+        bouttonGauche.h = height * .45;
+        bouttonGauche.alpha = 1;
+        afficherBoutton(&bouttonGauche, input->shader);
+
+        if (bouttonDroit.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) return roles[1];
+        if (bouttonGauche.viensDetreClicker && input->nombreDimageDansUnEtat > NBR_MIN_DANS_UN_ETAT) return roles[0];
 
         glfwPollEvents();
         glfwSwapBuffers(input->fenetre);

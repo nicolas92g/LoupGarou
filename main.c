@@ -12,6 +12,9 @@ int main() {
     //creer l'interface graphique
     GUI input = make_GUI(fenetre);
 
+    Role ro[2] = { 0, 3 };
+    printf("role : %d\n",choisirUneCarte(&input, ro));
+
     //recupere le nbr de joueurs et alloue un tableau de cette taille
     recupererLeNombreDeJoueurs(&input);
     Role* roles = (Role*)calloc(input.nombreDeJoueur, sizeof(Role));
@@ -20,6 +23,7 @@ int main() {
     assert(roles);
 
     attribution(roles, input.nombreDeJoueur);
+    fPetiteFille(&input, roles, input.nombreDeJoueur);
 
     unsigned short amoureux[2];
     fCupidon(&input, roles, amoureux);

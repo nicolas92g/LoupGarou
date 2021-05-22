@@ -13,5 +13,6 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 void fVoyante(GUI* input, Role* tabRoles);
 int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie);
 void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[]);
+void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie);
 void fVoleur(GUI* input, Role* tabRoles);
 void fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie);
