@@ -19,23 +19,7 @@ int main() {
 
     attribution(roles, input.nombreDeJoueur);
 
-    unsigned short ptr;
-    //fSorciere(&input, roles, true, true, 12, input.nombreDeJoueur, &ptr);
-
-    //verifie l'allocation dynamique
-    assert(roles);
-
-
-    // unsigned short amoureux[2];
-    //fCupidon(&input, roles, amoureux);
-
-    //montrerLeRoleDeChaqueJoueurs(&input, roles);
-
-    fVoleur(&input, roles);
-
-    //caseCapitaine = voteCapitaine(&input);
-    
-    //caseJoueurELimine = voteFinDeTour(&input, roles, input.nombreDeJoueur, caseCapitaine);
+    deroulementDeLaPartie(&input, roles);
 
     //finir le programme
     free(roles);

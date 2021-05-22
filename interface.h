@@ -39,7 +39,8 @@ typedef enum Role {
 	ROLE_CUPIDON,
 	ROLE_CHASSEUR,
 	ROLE_SORCIERE,
-	ROLE_VOLEUR
+	ROLE_VOLEUR,
+	ROLE_MORT = -1
 } Role;
 /**
  * @brief definit un boutton 2D, sa position et les différentes textures qu'il peut avoir
