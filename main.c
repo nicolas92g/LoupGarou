@@ -2,18 +2,27 @@
 #include "jeux.h"
 
 int main() {
-    int caseCapitaine;
-    int caseJoueurELimine;
+    int caseCapitaine;      //indique le joueur qui est capitaine
+    int caseJoueurELimine;  
     
+    //creer la fenetre
     GLFWwindow* fenetre;
     creerLaFenetre(&fenetre);
 
+    //creer l'interface graphique
     GUI input = make_GUI(fenetre);
-    recupererLeNombreDeJoueurs(&input);
 
-    Role *roles = (Role*)calloc(input.nombreDeJoueur, sizeof(Role));
+    //recupere le nbr de joueurs et alloue un tableau de cette taille
+    recupererLeNombreDeJoueurs(&input);
+    Role* roles = (Role*)calloc(input.nombreDeJoueur, sizeof(Role));
+
+    //verifie l'allocation dynamique
+    assert(roles);
 
     attribution(roles, input.nombreDeJoueur);
+
+    unsigned short amoureux[2];
+    fCupidon(&input, roles, amoureux);
 
     montrerLeRoleDeChaqueJoueurs(&input, roles);
 

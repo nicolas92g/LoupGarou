@@ -388,6 +388,9 @@ void fVoyante(GUI* input, Role* tabRoles) {
 	//alloue un tableau de tous les joueurs que peut voir la voyante
 	unsigned short* joueursAVoir = (unsigned short*)calloc(input->nombreDeJoueur - 1, sizeof(unsigned short));
 	
+	//verifie l'allocation dynamique
+	assert(joueursAVoir);
+	
 	//permet de stocker si on est déjà trouvé la voyante dans le tableau des roles
 	bool trouverLaSorciere = false;
 
@@ -412,71 +415,26 @@ void fVoyante(GUI* input, Role* tabRoles) {
 	free(joueursAVoir);
 }
 
-void fCupidon(GUI* input, Role* tabRoles, int tabCupidon[])
+void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[])
 {
-	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
-	unsigned short caseJoueur;
-	unsigned short caseCupidon = 0;
-	unsigned short i;
-	//tab
+	unsigned short caseCupidon = 1;
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
-	//bool
-	bool vote_i = FAUX; // _i = ?
+	char text[57];
+	unsigned short buf;
 
 	//Recherche de cupidon
-	while (tabRoles[caseCupidon] == ROLE_CUPIDON)
-	{
-		caseCupidon += 1;
-	}
+	while (tabRoles[caseCupidon - 1] == ROLE_CUPIDON) caseCupidon++;
 
-	/*for (i = 0; i < 2; i++)
-	{
-		vote_i = FAUX;
+	//demande le premier joueur du couple
+	sprintf_s(text, 56, "Cupidon, Joueur %d doit choisir le 1er Joueur du couple", caseCupidon);
+	tabCupidon[0] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur, text, .5);
 
-		while (!vote_i)
-		{
-			char text[55];
-			sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, i + 1);
-			caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
+	//enleve ce joueur du tableau
+	buf = tabJoueur[tabCupidon[0] - 1];
+	tabJoueur[tabCupidon[0] - 1] = tabJoueur[input->nombreDeJoueur - 1];
+	tabJoueur[input->nombreDeJoueur - 1] = buf;
 
-			if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
-			{
-				tabCupidon[i] = caseJoueur;
-				afficherTableau2(tabCupidon, 2);
-				vote_i = VRAI;
-			}
-		}
-	}*/
-
-	vote_i = FAUX;
-
-	while (!vote_i)
-	{
-		char text[55];
-		sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, 0 + 1);
-		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
-
-		if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
-		{
-			tabCupidon[0] = caseJoueur;
-			afficherTableau2(tabCupidon, 2);
-			vote_i = VRAI;
-		}
-	}
-
-	vote_i = FAUX;
-
-	while (!vote_i)
-	{
-		char text[55];
-		sprintf_s(text, 55, "Cupidon, Joueur %d doit choisir le Joueur %d du couple", caseCupidon + 1, 1 + 1);
-		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .5);
-
-		if (caseJoueur <= nbrDeJoueurs && tabCupidon[0] != caseJoueur)
-		{
-			tabCupidon[1] = caseJoueur;
-			afficherTableau2(tabCupidon, 2);
-			vote_i = VRAI;
-		}
-	}
+	//demande le 2eme joueur du couple
+	sprintf_s(text, 57, "Cupidon, Joueur %d doit choisir le 2eme Joueur du couple", caseCupidon);
+	tabCupidon[1] = choisirUnJoueur(input, tabJoueur, input->nombreDeJoueur - 1, text, .5);
 }
