@@ -17,3 +17,5 @@ void fCupidon(GUI* input, Role* tabRoles, unsigned short tabCupidon[]);
 void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie);
 void fVoleur(GUI* input, Role* tabRoles);
 bool fSorciere(GUI* input, Role* tabRoles, bool peutTuer, bool peutSauver, short joueurTuee, unsigned short nbrDeJoueurEnVie, unsigned short* joueursTueParLaSorciere);
+void deroulementDeLaPartie(GUI* input, Role* roles);
+int fChasseur(GUI* input, Role* tabRoles, unsigned short joueursEnVie);
