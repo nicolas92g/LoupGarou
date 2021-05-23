@@ -273,9 +273,9 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	//creation Tableau joueur en vie
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
-		if (tabRoles[i] != -1)
+		if (tabRoles[i] != ROLE_MORT && tabRoles[i] != ROLE_LOUP_GAROU)
 		{
-			tabJoueurEnVie[j] = i+1;
+			tabJoueurEnVie[j] = i + 1;
 			j += 1;
 		}
 	}
@@ -459,6 +459,8 @@ void fVoleur(GUI* input, Role* tabRoles)
 	{
 		numeroJoueur += 1;
 	}
+	//Annonce du reveille
+	afficherMessage(input, "Le voleur se reveille", .2);
 	
 	//Remplissage de tab Voleur avec les roles non attribues
 	tabVoleur[0] = ROLE_LOUP_GAROU;
@@ -600,14 +602,39 @@ void tuerJoueur(unsigned short joueurATuer, Role* roles, unsigned short* couple,
 	}
 }
 
+void afficherLesMorts(GUI* input, unsigned short nbrDeJoueursTue, unsigned short* joueursTue, unsigned short* couple, Role* roles, Role* rolesEnVie, unsigned short* capitaine) {
+	for (size_t i = 0; i < nbrDeJoueursTue; i++)
+	{
+		if (roles[joueursTue[i] - 1] == ROLE_CHASSEUR) {
+			tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrDeJoueursTue);
+		}
+		if (joueursTue[i] == *capitaine) {
+
+			unsigned short joueursEnVie[17] = { 0 };
+			int j = 0;
+			for (size_t i = 0; i < input->nombreDeJoueur; i++)
+			{
+				if (rolesEnVie[i] != ROLE_MORT) {
+					joueursEnVie[j] = i + 1;
+					j++;
+				}
+			}
+
+			*capitaine = choisirUnJoueur(input, joueursEnVie, j, "le capitaine est mort, il doit en choisir un nouveau", .55);
+		}
+	}
+}
+
 void deroulementDeLaPartie(GUI* input, Role* roles){
 	bool SorcierePotionTuer = true;
 	bool SorcierePotionSauver = true;
+	bool SorciereAguerit = false;
+	bool SorciereAtuer = false;
 
 	roles[0] = ROLE_CHASSEUR;
-	roles[1] = ROLE_VOLEUR;
+	roles[1] = ROLE_VILLAGEOIS;
 	roles[2] = ROLE_VILLAGEOIS;
-	roles[3] = ROLE_VOYANTE;
+	roles[3] = ROLE_VILLAGEOIS;
 	roles[4] = ROLE_LOUP_GAROU;
 	roles[5] = ROLE_LOUP_GAROU;
 	roles[6] = ROLE_SORCIERE;
@@ -647,20 +674,25 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 
 	//boucle de jeu
 	do{
+		//permet de stocker les joueurs morts
 		unsigned short nbrJoueursTue = 0;
 		unsigned short joueursTue[4] = { 0 };
 
+		//appelle la voyante
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_VOYANTE) != 20) {
 			fVoyante(input, rolesEnVie);
 		}
 
+		//appelle les  loups 
 		unsigned short joueursTueParLaSorciere = 20;
 		unsigned short joueursTueParLesLoups = fLoupgarou(input, rolesEnVie, nbrDeJoueursEnVie);
 		tuerJoueur(joueursTueParLesLoups, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
 
+		//appelle la petite-fille
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_PETITE_FILLE) != 20)
 			fPetiteFille(input, rolesEnVie, input->nombreDeJoueur);
 		
+		//Sorciere
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_SORCIERE) != 20 && (SorcierePotionTuer || SorcierePotionSauver)) {
 			if (fSorciere(input, rolesEnVie, &SorcierePotionSauver, &SorcierePotionTuer, joueursTueParLesLoups, nbrDeJoueursEnVie, &joueursTueParLaSorciere)) {
 				for (size_t i = 0; i < nbrJoueursTue; i++)
@@ -668,38 +700,33 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 					rolesEnVie[joueursTue[i] - 1] = roles[joueursTue[i] - 1];
 				}
 				nbrJoueursTue = 0;
+				SorciereAguerit = true;
 			}
 			else {
 				if (joueursTueParLaSorciere != 20) {
-					tuerJoueur(joueursTueParLaSorciere, rolesEnVie,couple, joueursTue, &nbrJoueursTue);
-				}				
+					tuerJoueur(joueursTueParLaSorciere, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+				}
+				SorciereAtuer = false;
 			}
 		}
-			
+		afficherMessage(input, "le village se reveille", .2);
+		
+		//annonce action sorciere
+		if (SorciereAguerit)
+		{
+			afficherMessage(input, "La sorciere a sauver quelqu un cette nuit", .4);
+			SorciereAguerit = false;
+		}
+		if (SorciereAtuer)
+		{
+			afficherMessage(input, "La sorciere a tuer quelqu'un cette nuit", .4);
+			SorciereAtuer = false;
+		}
 
 		nbrDeJoueursEnVie -= nbrJoueursTue;
 
 		if (nbrJoueursTue > 0) {
-			for (size_t i = 0; i < nbrJoueursTue; i++)
-			{
-				if (roles[joueursTue[i] - 1] == ROLE_CHASSEUR) {
-					tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrJoueursTue);
-				}
-				if (joueursTue[i] == capitaine) {
-
-					unsigned short joueursEnVie[17] = { 0 };
-					int j = 0;
-					for (size_t i = 0; i < input->nombreDeJoueur; i++)
-					{
-						if (rolesEnVie[i] != ROLE_MORT) {
-							joueursEnVie[j] = i + 1;
-							j++;
-						}
-					}
-
-					choisirUnJoueur(input, joueursEnVie, j, "le capitaine est mort, il doit en choisir un nouveau", .55);
-				}
-			}
+			afficherLesMorts(input, nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
 
 			char text[100];
 			sprintf_s(text, 100, "les Joueurs morts sont : %d", joueursTue[0]);
@@ -711,31 +738,45 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 			}
 
 			afficherMessage(input, text, .35);
+
+			for (unsigned short i = 0; i < nbrJoueursTue; ++i) {
+				montrerLeRoleDuJoueur(input, roles[joueursTue[i] - 1], joueursTue[i]);
+			}
 		}
 		else afficherMessage(input, "il n'y a eu aucun mort cette nuit", .4);
 
+		nbrJoueursTue = 0;
+
 		unsigned short joueurVote = voteFinDeTour(input, rolesEnVie, nbrDeJoueursEnVie, capitaine);
-		tuerJoueur(joueurVote, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+		tuerJoueur(joueurVote + 1, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
 
-		if (roles[joueurVote - 1] == ROLE_CHASSEUR) {
-			tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+		montrerLeRoleDuJoueur(input, roles[joueurVote], joueurVote + 1);
+		if (nbrJoueursTue == 2) {
+			char text[100];
+			sprintf_s(text, 100, "le joueur %d etais en couple avec %d", joueursTue[0], joueursTue[1]);
+			afficherMessage(input, text, .4);
 		}
-		if (joueursTue == capitaine) {
-			unsigned short joueursEnVie[17] = { 0 };
-			int j = 0;
-			for (size_t i = 0; i < input->nombreDeJoueur; i++)
-			{
-				if (rolesEnVie[i] != ROLE_MORT) {
-					joueursEnVie[j] = i + 1;
-					j++;
-				}
-			}
 
-			choisirUnJoueur(input, joueursEnVie, j, "le capitaine est mort, il doit en choisir un nouveau", .55);
-		}
+		afficherLesMorts(input, nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
 
 		
 	} while (!partieEstFinie(rolesEnVie, input->nombreDeJoueur));
 	
+	bool IlnyAPlusDeLoups = false;
+	if (LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_LOUP_GAROU) == 20)
+	{
+		IlnyAPlusDeLoups = true;
+	}
+
+	//bilan
+	if (IlnyAPlusDeLoups)
+	{
+		afficherMessage(input, "Le village a gagne", .2);
+	}
+	else
+	{
+		afficherMessage(input, "Les loups on gagne", .2);
+	}
+
 	free(rolesEnVie);
 }
