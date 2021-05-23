@@ -8,15 +8,20 @@ void attribution(Role* tabRoles, unsigned short nbrDeJoueurs) {
 	int roleAlea = 0;
 	int nLoupgarou = 0;
 	int i;
-	//Tab
+	//Tableaux
 	int tabAttributionJoueur[18];
 	int tabAttributionRoles[17];
-	//ALea
+	//Mise en place de l'aleatoire
 	time_t t;
 	srand((unsigned)time(&t));
-	//InitTab
+
+	////Initilisation de tableau Joueur. 
+	//Les cases du tableau contienne les numeros des joueurs
+	//Ce tableau contient tout les joueurs
 	initTab2(tabAttributionJoueur, nbrDeJoueurs, 0);
-	
+
+	////Initilisation de tableau Roles. 
+	//Ce tableau contient tout les roles qui vont être distribué
 	for (i = 0; i < 12; i++)
 	{
 		tabAttributionRoles[i] = ROLE_VILLAGEOIS;
@@ -37,14 +42,14 @@ void attribution(Role* tabRoles, unsigned short nbrDeJoueurs) {
 		nLoupgarou = 3;
 	}
 
-	///Voyante
+	// Distribution du role: Voyante
 	int caseJoueurAlea = rand() % (flecheJoueur + 1);
 	joueurAlea = tabAttributionJoueur[caseJoueurAlea];
 	tabRoles[joueurAlea] = ROLE_VOYANTE;
 	echangeCase(tabAttributionJoueur, caseJoueurAlea, flecheJoueur);
 	flecheJoueur = flecheJoueur - 1;
 
-	///LoupGarou
+	//Distribution des roles LoupGarou en fonction du nombre de joueurs
 	for (i = 0; i < nLoupgarou; i++)
 	{
 		caseJoueurAlea = rand() % (flecheJoueur + 1);
@@ -55,8 +60,7 @@ void attribution(Role* tabRoles, unsigned short nbrDeJoueurs) {
 		flecheJoueur = flecheJoueur - 1;
 	}
 
-	///Reste
-
+	//Distribution des roles restant en fonction du nombre de joueurs
 	while (flecheJoueur > 0) {
 		caseJoueurAlea = rand() % (flecheJoueur + 1);
 		caseRoleAlea = rand() % (flecheRole + 1);
@@ -74,7 +78,6 @@ void attribution(Role* tabRoles, unsigned short nbrDeJoueurs) {
 	caseRoleAlea = rand() % (flecheRole + 1);
 	joueurAlea = tabAttributionJoueur[caseJoueurAlea];
 	roleAlea = tabAttributionRoles[caseRoleAlea];
-
 	tabRoles[joueurAlea] = roleAlea;
 }
 
@@ -84,15 +87,16 @@ int voteCapitaine(GUI* input) {
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurElu = 0;
 	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
+	//booleen
 	bool egalite_i = FAUX; // _i = ?
-	//tab
+	//Tableaux
 	int tabEgalite[18] = { -1 };
 	int tabVote[18] = { 0 };
-	//Alea
+	//Mise en place de l'aleatoire
 	time_t t;
 	srand((unsigned)time(&t));
-	//
-
+	
+	//Chaque joueurs vote pour le joueur qu'il souhaite voir capitaine
 	int caseJoueur = 0;
 	unsigned short tabJoueur[18] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18 };
 	for (i = 0; i < nbrDeJoueurs; i++)
@@ -105,7 +109,7 @@ int voteCapitaine(GUI* input) {
 		afficherTableau(tabVote, nbrDeJoueurs);
 	}
 
-	// Recherche du joueur le plus vote
+	//Recherche du joueur le plus vote
 	tabEgalite[0] = caseAyantLePLusDeVote;
 	nCaseAyantLeMemeNombreDeVote = 1;
 	for (i = 1; i < nbrDeJoueurs; i++)
@@ -133,7 +137,6 @@ int voteCapitaine(GUI* input) {
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		//afficherTableau(tabEgalite, 18);
 	}
 	joueurElu = caseAyantLePLusDeVote;
 
@@ -144,10 +147,12 @@ int voteCapitaine(GUI* input) {
 		joueurElu = tabEgalite[rand() % (nCaseAyantLeMemeNombreDeVote + 1)];
 	}
 
+	//Affichage du joueur elu
 	char buffer[31];
 	sprintf_s(buffer, 31, "Le Joueur %d est elu capitaine", joueurElu + 1);
 	afficherMessage(input, buffer, .3);
 
+	//On retourne le numero du joueur elu
 	return joueurElu;
 }
 
@@ -158,15 +163,16 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurElimine = 0;
 	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
+	//Booleen
 	bool egalite_i = FAUX; // _i = ?
-	bool vote_i = FAUX; // _i = ?
-	//tab
+	//Tableaux
 	unsigned short tabEgalite[18];
 	int tabVote[18] = { 0 };
 	unsigned short tabJoueurEnVie[18];
-	//Alea
+	//Mise en place de l'aleatoire
 	time_t t;
 	srand((unsigned)time(&t));
+
 	//creation Tableau joueur en vie
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -177,6 +183,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		}
 	}
 	
+	//Chaque joueurs vote pour le joueur qu'il veut voir être elimine
 	int caseJoueur = 0;
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
@@ -223,10 +230,10 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 			nCaseAyantLeMemeNombreDeVote += 1;
 			tabEgalite[nCaseAyantLeMemeNombreDeVote - 1] = i;
 		}
-		//afficherTableau2(tabEgalite, 18);
 	}
 	joueurElimine = caseAyantLePLusDeVote;
 
+	//Le capitaine choisi quel joueur sera elimine en cas d'egalite
 	if (egalite_i)
 	{
 		for (i = 0; i < nCaseAyantLeMemeNombreDeVote; i++)
@@ -237,13 +244,9 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 		char text[48];
 		sprintf_s(text, 48, "Le capitaine, Joueur %d, doit eliminer un Joueur", i + 1);
 		joueurElimine = choisirUnJoueur(input, tabEgalite, nCaseAyantLeMemeNombreDeVote, text, .45) - 1;
-
-		if (tabVote[joueurElimine] == tabVote[caseAyantLePLusDeVote])
-		{
-			vote_i = VRAI;
-		}
 	}
 
+	//Annonce du joueur elimine
 	char buffer[25];
 	sprintf_s(buffer, 25, "Le Joueur %d est elimine", joueurElimine + 1);
 	afficherMessage(input, buffer, .3);
@@ -259,7 +262,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 	int nCaseAyantLeMemeNombreDeVote = 0;
 	int joueurVote = 0;
 	unsigned short nbrDeJoueurs = input->nombreDeJoueur;
-	//tab
+	//Tableau
 	unsigned short tabEgalite[18];
 	int tabVote[18] = { 0 };
 	unsigned short tabJoueurEnVie[18];
@@ -280,6 +283,7 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 		}
 	}
 
+	//Chaque loupgarou en vie vote pour le joueur qu'il souhaite elimine
 	for (i = 0; i < nbrDeJoueurs; i++)
 	{
 		vote_i = FAUX;
@@ -342,9 +346,12 @@ int fLoupgarou(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie)
 		joueurVote = tabEgalite[rand() % (nCaseAyantLeMemeNombreDeVote + 1)];
 	}
 
+	//Annonce du joueur elimine
 	char text[35];
 	sprintf_s(text, 35, "Vous avez eliminez le Joueur: %d", joueurVote + 1);
 	afficherMessage(input, text, .3);
+
+	//On retourne le numero du joueur elimine
 	return joueurVote + 1;
 }
 
@@ -444,25 +451,29 @@ void fVoleur(GUI* input, Role* tabRoles)
 	unsigned short nAlea;
 	unsigned short flecheTabVoleur;
 	unsigned short roleChoisi = 0;
-	//tab
+	//Tableau
 	unsigned short tabVoleur[19];
 	Role tabVoleurChoix[2] = {0,1};
-	//bool
+	//booleen
 	bool attribue;
-	//ALea
+	//Mise en place de l'aleatoire
 	time_t t;
 	srand((unsigned)time(&t));
-	//Init Tab
-	initTabShort(tabVoleur, 19, ROLE_VILLAGEOIS);
+
 	//on cherche qui est le voleur
 	while (tabRoles[numeroJoueur] != ROLE_VOLEUR)
 	{
 		numeroJoueur += 1;
 	}
+
 	//Annonce du reveille
 	afficherMessage(input, "Le voleur se reveille", .2);
 	
-	//Remplissage de tab Voleur avec les roles non attribues
+	////Remplissage de tab Voleur avec les roles non attribues
+	//Remplissage avec des roles villageaois
+	initTabShort(tabVoleur, 19, ROLE_VILLAGEOIS);
+
+	//AJout des roles loupgarou non-attribue
 	tabVoleur[0] = ROLE_LOUP_GAROU;
 	caseTabVoleur = 1;
 	if (nbrDeJoueurs < 11)
@@ -471,6 +482,7 @@ void fVoleur(GUI* input, Role* tabRoles)
 		caseTabVoleur += 1;
 	}
 
+	//Ajout des autres roles (different de villageois et loupgarou)
 	for (j = 3; j < 7; j++)
 	{
 		attribue = FAUX;
@@ -488,7 +500,7 @@ void fVoleur(GUI* input, Role* tabRoles)
 		}
 	}
 
-	//choix aleatoire des deux roles
+	//choix aleatoire des deux roles parmis lequel le voleur fera son choix
 	flecheTabVoleur = 19 - nbrDeJoueurs;
 	
 	nAlea = rand() % flecheTabVoleur;
@@ -499,8 +511,8 @@ void fVoleur(GUI* input, Role* tabRoles)
 	nAlea = rand() % flecheTabVoleur;
 	tabVoleurChoix[1] = tabVoleur[nAlea];
 
+	//Le voleur choisi quel roles il souhaite voler et attribution de ce dernier
 	roleChoisi = choisirUneCarte(input, tabVoleurChoix);
-
 	tabRoles[numeroJoueur] = roleChoisi;
 }
 
