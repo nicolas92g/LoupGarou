@@ -67,13 +67,8 @@ mat4x4 matriceDeRotation(vec4 u, float A)
     //si l'axe est un vecteur nulle ou si l'angle de rotation est nulle
     if (u.x == .0f && u.y == .0f && u.z == .0f || A == .0f) return matriceDidentite(1);
 
-    //calcule la norme du vecteur axe
-    double norme = sqrt((double)u.x * (double)u.x
-        + (double)u.y * (double)u.y
-        + (double)u.z * (double)u.z);
-
-    //normalise (norme de l'axe = 1.0f)
-    u = multiplie(u, 1.0f / norme);
+    //u prends une norme égale a 1
+    u = normalise(u);
 
     //ameliore la complexité temporelle
     const float cosA = cos(A);
@@ -82,10 +77,10 @@ mat4x4 matriceDeRotation(vec4 u, float A)
 
     //composer la matrice
     mat4x4 ret;
-    ret.col0 = make_vec4(cosA + carre(u.x) * IcosA, u.y * u.x * IcosA + u.z * sinA, u.z * u.x * IcosA - u.y * sinA, 0);
-    ret.col1 = make_vec4(u.x * u.y * IcosA - u.z * sinA, cosA + carre(u.y) * IcosA, u.z * u.y * IcosA - u.x * sinA, 0);
-    ret.col2 = make_vec4(u.x * u.z * IcosA - u.y * sinA, u.y * u.z * IcosA - u.x * sinA, cosA + carre(u.z) * IcosA, 0);
-    ret.col3 = make_vec4(0, 0, 0, 1);
+    ret.col0 = make_vec4(cosA + carre(u.x) * IcosA     , u.y * u.x * IcosA + u.z * sinA, u.z * u.x * IcosA - u.y * sinA, 0);
+    ret.col1 = make_vec4(u.x * u.y * IcosA - u.z * sinA, cosA + carre(u.y) * IcosA     , u.z * u.y * IcosA - u.x * sinA, 0);
+    ret.col2 = make_vec4(u.x * u.z * IcosA - u.y * sinA, u.y * u.z * IcosA - u.x * sinA, cosA + carre(u.z) * IcosA     , 0);
+    ret.col3 = make_vec4(                             0,                              0,                              0, 1);
     return ret;
 }
 
