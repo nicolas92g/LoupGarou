@@ -106,7 +106,6 @@ int voteCapitaine(GUI* input) {
 		caseJoueur = choisirUnJoueur(input, tabJoueur, nbrDeJoueurs, text, .45) - 1;
 
 		tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-		afficherTableau(tabVote, nbrDeJoueurs);
 	}
 
 	//Recherche du joueur le plus vote
@@ -197,8 +196,7 @@ int voteFinDeTour(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie, 
 			if (caseCapitaine == i)
 			{
 				tabVote[caseJoueur] = tabVote[caseJoueur] + 1;
-			}
-			afficherTableau(tabVote, nbrDeJoueurs);		
+			}	
 		}
 	}
 
@@ -434,8 +432,8 @@ void fPetiteFille(GUI* input, Role* tabRoles, unsigned short nbrDeJoueursEnVie) 
 
 	for (size_t i = 1; i < nbrLoupGarou; i++)
 	{
-		size_t offset = 37 + ((i - 1) * 3);
-		sprintf_s(buffer + offset, 200 - offset, ", %d", loups[i]);
+		size_t offset = 37 + ((i - 1) * 4);
+		sprintf_s(buffer + offset, 200 - offset, ", %d ", loups[i]);
 	}
 
 	afficherMessage(input, buffer, .5);
@@ -508,7 +506,7 @@ void fVoleur(GUI* input, Role* tabRoles)
 	echangeCase2(tabVoleur, nAlea, 18);
 
 	flecheTabVoleur -= 1;
-	nAlea = rand() % flecheTabVoleur;
+	nAlea = rand() % (flecheTabVoleur + 1);
 	tabVoleurChoix[1] = tabVoleur[nAlea];
 
 	//Le voleur choisi quel roles il souhaite voler et attribution de ce dernier
