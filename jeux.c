@@ -602,11 +602,11 @@ void tuerJoueur(unsigned short joueurATuer, Role* roles, unsigned short* couple,
 	}
 }
 
-void afficherLesMorts(GUI* input, unsigned short nbrDeJoueursTue, unsigned short* joueursTue, unsigned short* couple, Role* roles, Role* rolesEnVie, unsigned short* capitaine) {
-	for (size_t i = 0; i < nbrDeJoueursTue; i++)
+void afficherLesMorts(GUI* input, unsigned short *nbrDeJoueursTue, unsigned short* joueursTue, unsigned short* couple, Role* roles, Role* rolesEnVie, unsigned short* capitaine) {
+	for (size_t i = 0; i < *nbrDeJoueursTue; i++)
 	{
 		if (roles[joueursTue[i] - 1] == ROLE_CHASSEUR) {
-			tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, &nbrDeJoueursTue);
+			tuerJoueur(fChasseur(input, rolesEnVie), rolesEnVie, couple, joueursTue, nbrDeJoueursTue);
 		}
 		if (joueursTue[i] == *capitaine) {
 
@@ -626,47 +626,49 @@ void afficherLesMorts(GUI* input, unsigned short nbrDeJoueursTue, unsigned short
 }
 
 void deroulementDeLaPartie(GUI* input, Role* roles){
+	//permet de savoir si la sorciere a encore ses potions
 	bool SorcierePotionTuer = true;
 	bool SorcierePotionSauver = true;
+	//permet de savoir si la sorciere viens d'utiliser ses potions
 	bool SorciereAguerit = false;
 	bool SorciereAtuer = false;
 
-	roles[0] = ROLE_CHASSEUR;
-	roles[1] = ROLE_VILLAGEOIS;
-	roles[2] = ROLE_VILLAGEOIS;
-	roles[3] = ROLE_VILLAGEOIS;
-	roles[4] = ROLE_LOUP_GAROU;
-	roles[5] = ROLE_LOUP_GAROU;
-	roles[6] = ROLE_SORCIERE;
-	roles[7] = ROLE_CUPIDON;
-
-	input->nombreDeJoueur = 8;
-
+	//creer une copie du tableau des roles
 	Role* rolesEnVie = (Role*)malloc(sizeof(Role) * input->nombreDeJoueur);
+	//verifie que l'allocation a fonctioner
 	assert(rolesEnVie);
+	//rempli ce tableau
 	for (size_t i = 0; i < input->nombreDeJoueur; i++) rolesEnVie[i] = roles[i];
 
+	//stocke le nbr de joueurs en vie
 	unsigned short nbrDeJoueursEnVie = input->nombreDeJoueur;
+	//stocke les deux joueurs qui sont en couple
 	unsigned short couple[2] = {0};
+	//stocke le joueur qui est capitaine
 	unsigned short capitaine = 20;
 
-
+	//joue une animation pour montrer le role de chaque joueurs un a un
 	montrerLeRoleDeChaqueJoueurs(input, roles);
-	afficherMessage(input, "le village s endort !", .17f);
+
 	//election capitaine
 	capitaine = voteCapitaine(input) + 1;
 
-	//appelle le voleur en debut de partie
+	//debute la nuit
+	afficherMessage(input, "le village s'endort !", .17f);
+
+	//appelle le voleur en debut de partie si il existe
 	unsigned short posVoleur = LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_VOLEUR);
 	if (posVoleur != 20) {
 		fVoleur(input, rolesEnVie);
+		//change le role du voleur aussi dans l'ancien tableau des roles
 		roles[posVoleur] = rolesEnVie[posVoleur];
 	}
 		
 	//appelle cupidon en début de partie
 	if (LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_CUPIDON) != 20) {
 		fCupidon(input, rolesEnVie, couple);
-
+		
+		//creer une chaine de charactere sans charactere speciaux
 		char text[100];
 		sprintf_s(text, 100, "les amoureux sont les Joueurs %d et %d", couple[0], couple[1]);
 		afficherMessage(input, text, .4);
@@ -678,7 +680,7 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 		unsigned short nbrJoueursTue = 0;
 		unsigned short joueursTue[4] = { 0 };
 
-		//appelle la voyante
+		//appelle la voyante si elle existe
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_VOYANTE) != 20) {
 			fVoyante(input, rolesEnVie);
 		}
@@ -688,12 +690,13 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 		unsigned short joueursTueParLesLoups = fLoupgarou(input, rolesEnVie, nbrDeJoueursEnVie);
 		tuerJoueur(joueursTueParLesLoups, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
 
-		//appelle la petite-fille
+		//appelle la petite-fille si ele existe
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_PETITE_FILLE) != 20)
 			fPetiteFille(input, rolesEnVie, input->nombreDeJoueur);
 		
-		//Sorciere
+		//appelle la sorciere si elle existe
 		if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_SORCIERE) != 20 && (SorcierePotionTuer || SorcierePotionSauver)) {
+			//si la sorciere a choisi de sauver
 			if (fSorciere(input, rolesEnVie, &SorcierePotionSauver, &SorcierePotionTuer, joueursTueParLesLoups, nbrDeJoueursEnVie, &joueursTueParLaSorciere)) {
 				for (size_t i = 0; i < nbrJoueursTue; i++)
 				{
@@ -702,81 +705,118 @@ void deroulementDeLaPartie(GUI* input, Role* roles){
 				nbrJoueursTue = 0;
 				SorciereAguerit = true;
 			}
-			else {
-				if (joueursTueParLaSorciere != 20) {
-					tuerJoueur(joueursTueParLaSorciere, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
-				}
-				SorciereAtuer = false;
+			//si la sorciere a choisi de tuer
+			else if (joueursTueParLaSorciere != 20) {
+				tuerJoueur(joueursTueParLaSorciere, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
+				SorciereAtuer = true;
 			}
 		}
-		afficherMessage(input, "le village se reveille", .2);
-		
-		//annonce action sorciere
+		//test si la partie c'est pas finie
+		if (partieEstFinie(rolesEnVie, input->nombreDeJoueur)) break;
+
+		//affiche le village se reveille
+		{
+			unsigned char text[100] = "le village se reveille";
+			text[15] = 233;
+			afficherMessage(input, text, .2);
+		}
+
+		//annonce de l'action de la sorciere
 		if (SorciereAguerit)
 		{
-			afficherMessage(input, "La sorciere a sauver quelqu un cette nuit", .4);
+			unsigned char text[42] = "La sorciere a sauver quelqu un cette nuit";
+			text[8] = 232;
+			afficherMessage(input, text, .4);
 			SorciereAguerit = false;
 		}
 		if (SorciereAtuer)
 		{
-			afficherMessage(input, "La sorciere a tuer quelqu'un cette nuit", .4);
+			unsigned char text[42] = "La sorciere a tuer quelqu un cette nuit";
+			text[8] = 232;
+			afficherMessage(input, text, .4);
 			SorciereAtuer = false;
 		}
 
-		nbrDeJoueursEnVie -= nbrJoueursTue;
-
+		//affichage des joueurs morts
 		if (nbrJoueursTue > 0) {
-			afficherLesMorts(input, nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
+			afficherLesMorts(input, &nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
 
+			//creer une chaine de characteres
 			char text[100];
 			sprintf_s(text, 100, "les Joueurs morts sont : %d", joueursTue[0]);
 
+			//ajoute le numero de tous des joueurs tué a la chaine des charactere
 			for (size_t i = 1; i < nbrJoueursTue; i++)
 			{
+				//calcule la position du texte a ajouter
 				size_t offset = 26 + (i - 1) * 4;
+				//ajoute le texte sur la chaine deja existante avec un decalage
 				sprintf_s(text + offset , 100 - offset, ", %d ", joueursTue[i]);
 			}
-
+			//affiche la chaine finale
 			afficherMessage(input, text, .35);
 
+			//montre le role de chacun des joueurs tue
 			for (unsigned short i = 0; i < nbrJoueursTue; ++i) {
 				montrerLeRoleDuJoueur(input, roles[joueursTue[i] - 1], joueursTue[i]);
 			}
 		}
+		//affiche si il y a eu aucun morts
 		else afficherMessage(input, "il n'y a eu aucun mort cette nuit", .4);
 
+		//reduit le nombre de joueurs en vie
+		nbrDeJoueursEnVie -= nbrJoueursTue;
+		//remet le compteur de mort a zero pour le vote des villageois qui va suivre
 		nbrJoueursTue = 0;
 
+		afficherMessage(input, "Les villageois doivent voter pour un Joueur a tuer", .4);
+		//vote des villageois
 		unsigned short joueurVote = voteFinDeTour(input, rolesEnVie, nbrDeJoueursEnVie, capitaine);
 		tuerJoueur(joueurVote + 1, rolesEnVie, couple, joueursTue, &nbrJoueursTue);
 
+		//affiche le role du joueur tue par les villageois
 		montrerLeRoleDuJoueur(input, roles[joueurVote], joueurVote + 1);
 		if (nbrJoueursTue == 2) {
-			char text[100];
-			sprintf_s(text, 100, "le joueur %d etais en couple avec %d", joueursTue[0], joueursTue[1]);
+			//creer une chaine de chjaractere non spéciaux
+			char buffer[37];
+			sprintf_s(buffer, 37, "le Joueur %d etais en couple avec %d", joueursTue[0], joueursTue[1]);
+			//ajoute des caracteres spéciaux au text
+			unsigned char text[37];
+			for (int i = 0; i < 37; i++) text[i] = buffer[i];
+			//si le nombre fait 2 chiffre alors ajouté un a la pos du charactere special
+			text[12 + (joueursTue[0] > 10)] = 233;
 			afficherMessage(input, text, .4);
 		}
-
-		afficherLesMorts(input, nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
-
+		//verifie que le joueur tue n'etais pas en couple ou chasseur
+		afficherLesMorts(input, &nbrJoueursTue, joueursTue, couple, roles, rolesEnVie, &capitaine);
 		
-	} while (!partieEstFinie(rolesEnVie, input->nombreDeJoueur));
-	
-	bool IlnyAPlusDeLoups = false;
-	if (LeRoleExiste(rolesEnVie, nbrDeJoueursEnVie, ROLE_LOUP_GAROU) == 20)
-	{
-		IlnyAPlusDeLoups = true;
-	}
+		//reduit le nbr de joueurs en vie
+		nbrDeJoueursEnVie -= nbrJoueursTue;
 
-	//bilan
-	if (IlnyAPlusDeLoups)
+		//finit la boucle si il n'y a plus de loups ou si il n'y a plus que des loups
+	} while (!partieEstFinie(rolesEnVie, input->nombreDeJoueur));
+
+
+	//affichage du vainqueur : 
+	//si il n'y as pas de loups
+	if (LeRoleExiste(rolesEnVie, input->nombreDeJoueur, ROLE_LOUP_GAROU) != 20)
 	{
-		afficherMessage(input, "Le village a gagne", .2);
+		//creer une chaine de charactere speciaux
+		unsigned char text[19] = "Les loups on gagne";
+		//met un 'é' a la position 17 de la chaine
+		text[17] = 233;
+		afficherMessage(input, text, .2);
 	}
+	//si il y a des loups
 	else
 	{
-		afficherMessage(input, "Les loups on gagne", .2);
+		//creer une chaine de charactere speciaux
+		unsigned char text[19] = "Le village a gagne";
+		//met un 'é' a la position 17 de la chaine
+		text[17] = 233;
+		afficherMessage(input, text, .2);
 	}
 
+	//libere le tableau alloué dynamiquement pour stocker les roles des joueurs
 	free(rolesEnVie);
 }
