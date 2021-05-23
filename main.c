@@ -26,8 +26,9 @@ int main() {
     //attribue un role a chaque joueurs
     attribution(roles, input.nombreDeJoueur);
 
-    //commence la partie
-    deroulementDeLaPartie(&input, roles);
+    //commence 10 partie
+    for (size_t i = 1; i < 10; ++i)
+        deroulementDeLaPartie(&input, roles);
     
     //finir le programme
     free(roles);
